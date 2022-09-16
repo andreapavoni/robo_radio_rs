@@ -1,17 +1,11 @@
 use reqwest_middleware::ClientBuilder;
 use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
-use serde::{Deserialize, Serialize};
 
 use super::{
     api_data::{Playlist as PlaylistResponse, Track as TrackResponse},
     Playlist, Track,
 };
-use crate::errors::{APILayerError, Error};
-
-#[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct APIResponse {
-    message: String,
-}
+use crate::errors::Error;
 
 pub async fn get_playlist_tracks(
     client_id: String,
@@ -31,16 +25,17 @@ pub async fn get_playlist_tracks(
         ))
         .send()
         .await
-        .map_err(|e| Error::MiddlewareReqwestAPIError(e))?;
+        .map_err(|e| Error::SoundcloudRequestError(e))?;
 
     if !res.status().is_success() {
-        let err = transform_error(res).await;
-        return Err(Error::ClientError(err));
+        return Err(Error::SoundcloudResponseError(res.status().as_u16()));
     }
 
     match res.json::<PlaylistResponse>().await {
         Ok(res) => Ok(transform_playlist_response(res).await),
-        Err(e) => Err(Error::ReqwestAPIError(e)),
+        Err(_) => Err(Error::SoundcloudJsonParseError(String::from(
+            "PlaylistResponse",
+        ))),
     }
 }
 
@@ -58,23 +53,17 @@ pub async fn get_track(client_id: String, track_id: u64) -> Result<Track, Error>
         ))
         .send()
         .await
-        .map_err(|e| Error::MiddlewareReqwestAPIError(e))?;
+        .map_err(|e| Error::SoundcloudRequestError(e))?;
 
     if !res.status().is_success() {
-        let err = transform_error(res).await;
-        return Err(Error::ClientError(err));
+        return Err(Error::SoundcloudResponseError(res.status().as_u16()));
     }
 
     match res.json::<TrackResponse>().await {
         Ok(res) => Ok(transform_track_response(res).await),
-        Err(e) => Err(Error::ReqwestAPIError(e)),
-    }
-}
-
-async fn transform_error(res: reqwest::Response) -> APILayerError {
-    APILayerError {
-        status: res.status().as_u16(),
-        message: res.json::<APIResponse>().await.unwrap().message,
+        Err(_) => Err(Error::SoundcloudJsonParseError(String::from(
+            "TrackResponse",
+        ))),
     }
 }
 
