@@ -1,12 +1,21 @@
+use crate::errors::Error;
 use api_data::{PlaylistResponse, TrackResponse};
 use std::convert::From;
 
+use self::client::{get_playlist_tracks, get_track, get_track_stream};
+
 mod api_data;
-pub mod client;
+mod client;
 
 #[derive(Debug)]
 pub struct Playlist {
     pub tracks_ids: Vec<u64>,
+}
+
+impl Playlist {
+    pub async fn new(client_id: String, playlist_id: String) -> Result<Playlist, Error> {
+        get_playlist_tracks(client_id, playlist_id).await
+    }
 }
 
 impl std::fmt::Display for Playlist {
@@ -23,7 +32,7 @@ impl From<PlaylistResponse> for Playlist {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Track {
     pub id: u64,
     pub permalink_url: Option<String>,
@@ -34,6 +43,15 @@ pub struct Track {
     pub artist_permalink: Option<String>,
     pub url: Option<String>,
     pub token: Option<String>,
+}
+
+impl Track {
+    pub async fn new(client_id: String, track_id: u64) -> Result<Track, Error> {
+        let mut track = get_track(client_id.clone(), track_id).await?;
+        let track_stream = get_track_stream(client_id, track.url.unwrap()).await?;
+        track.url = track_stream.url.clone();
+        Ok(track.clone())
+    }
 }
 
 impl From<TrackResponse> for Track {

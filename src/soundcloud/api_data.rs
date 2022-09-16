@@ -141,6 +141,12 @@ pub struct TrackResponse {
 
 #[derive(Default, Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
+pub struct TrackStreamResponse {
+    pub url: Option<String>,
+}
+
+#[derive(Default, Debug, Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub struct User {
     #[serde(rename = "avatar_url")]
     pub avatar_url: String,
