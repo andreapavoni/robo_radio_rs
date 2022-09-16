@@ -1,6 +1,6 @@
+use axum::{routing::get, Router};
 use std::env;
 
-use axum::{routing::get, Router};
 use robo_radio_rs::soundcloud::client::{get_playlist_tracks, get_track};
 
 #[tokio::main]

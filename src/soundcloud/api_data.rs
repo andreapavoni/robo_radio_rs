@@ -1,9 +1,9 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::Value;
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct Playlist {
+pub struct PlaylistResponse {
     #[serde(rename = "artwork_url")]
     pub artwork_url: Option<Value>,
     #[serde(rename = "created_at")]
@@ -54,14 +54,14 @@ pub struct Playlist {
     #[serde(rename = "display_date")]
     pub display_date: String,
     pub user: User,
-    pub tracks: Vec<Track>,
+    pub tracks: Vec<TrackResponse>,
     #[serde(rename = "track_count")]
     pub track_count: u64,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct Track {
+pub struct TrackResponse {
     #[serde(rename = "artwork_url")]
     pub artwork_url: Option<String>,
     pub caption: Option<Value>,
@@ -139,7 +139,7 @@ pub struct Track {
     pub user: Option<User>,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct User {
     #[serde(rename = "avatar_url")]
@@ -173,7 +173,7 @@ pub struct User {
     pub station_permalink: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct Badges {
     pub pro: bool,
@@ -182,13 +182,13 @@ pub struct Badges {
     pub verified: bool,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct Media {
     pub transcodings: Vec<Transcoding>,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct Transcoding {
     pub url: String,
@@ -199,7 +199,7 @@ pub struct Transcoding {
     pub quality: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct Format {
     pub protocol: String,
