@@ -1,21 +1,37 @@
 use crate::errors::Error;
-use api_data::{PlaylistResponse, TrackResponse};
 use std::convert::From;
 
-use self::client::{get_playlist_tracks, get_track, get_track_stream};
+use self::client::{
+    fetch_playlist_tracks, fetch_track_info, fetch_track_stream, PlaylistResponse, TrackResponse,
+};
 
-mod api_data;
 mod client;
+
+#[derive(Debug)]
+pub struct ApiClient {
+    pub client_id: String,
+}
+
+impl ApiClient {
+    pub fn new(client_id: String) -> Self {
+        ApiClient { client_id }
+    }
+
+    pub async fn get_track(&self, track_id: u64) -> Result<Track, Error> {
+        let mut track = fetch_track_info(self.client_id.clone(), track_id).await?;
+        let track_stream = fetch_track_stream(self.client_id.clone(), track.url.unwrap()).await?;
+        track.url = track_stream.url.clone();
+        Ok(track.clone())
+    }
+
+    pub async fn get_playlist(&self, playlist_id: String) -> Result<Playlist, Error> {
+        fetch_playlist_tracks(self.client_id.clone(), playlist_id).await
+    }
+}
 
 #[derive(Debug)]
 pub struct Playlist {
     pub tracks_ids: Vec<u64>,
-}
-
-impl Playlist {
-    pub async fn new(client_id: String, playlist_id: String) -> Result<Playlist, Error> {
-        get_playlist_tracks(client_id, playlist_id).await
-    }
 }
 
 impl std::fmt::Display for Playlist {
@@ -43,15 +59,6 @@ pub struct Track {
     pub artist_permalink: Option<String>,
     pub url: Option<String>,
     pub token: Option<String>,
-}
-
-impl Track {
-    pub async fn new(client_id: String, track_id: u64) -> Result<Track, Error> {
-        let mut track = get_track(client_id.clone(), track_id).await?;
-        let track_stream = get_track_stream(client_id, track.url.unwrap()).await?;
-        track.url = track_stream.url.clone();
-        Ok(track.clone())
-    }
 }
 
 impl From<TrackResponse> for Track {

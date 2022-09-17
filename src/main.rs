@@ -1,10 +1,7 @@
 use axum::{routing::get, Router};
 use std::env;
 
-use robo_radio_rs::{
-    errors::Error,
-    soundcloud::{Playlist, Track},
-};
+use robo_radio_rs::{errors::Error, soundcloud::ApiClient};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
@@ -18,12 +15,14 @@ async fn main() -> Result<(), Error> {
         None => panic!("$ROBO_RADIO_SOUNDCLOUD_PLAYLIST_ID is not set"),
     };
 
-    let playlist = Playlist::new(client_id.clone(), playlist_id).await?;
+    let api = ApiClient::new(client_id.clone());
+
+    let playlist = api.get_playlist(playlist_id).await?;
     println!("====== Playlist IDs {:?}", playlist.tracks_ids);
 
     let track_id = 142863571;
 
-    let track = Track::new(client_id, track_id).await?;
+    let track = api.get_track(track_id).await?;
     println!("====== Track {:?}", track);
 
     let app = Router::new().route("/", get(|| async { "Hello, world!" }));
