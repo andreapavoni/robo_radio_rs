@@ -19,7 +19,12 @@ impl ApiClient {
 
     pub async fn get_track(&self, track_id: u64) -> Result<Track, Error> {
         let mut track = fetch_track_info(self.client_id.clone(), track_id).await?;
-        let track_stream = fetch_track_stream(self.client_id.clone(), track.url.unwrap()).await?;
+        let track_stream = fetch_track_stream(
+            self.client_id.clone(),
+            track.url.unwrap(),
+            track.token.as_ref().unwrap().to_string(),
+        )
+        .await?;
         track.url = track_stream.url.clone();
         Ok(track.clone())
     }

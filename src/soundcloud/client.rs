@@ -1,3 +1,4 @@
+use reqwest::header::HeaderMap;
 use reqwest_middleware::ClientBuilder;
 use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 use serde::Deserialize;
@@ -5,6 +6,9 @@ use serde_json::Value;
 
 use super::{Playlist, Track};
 use crate::errors::Error;
+
+static USER_AGENT: &str =
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:100.0) Gecko/20100101 Firefox/100.0";
 
 pub async fn fetch_playlist_tracks(
     client_id: String,
@@ -17,11 +21,15 @@ pub async fn fetch_playlist_tracks(
         .with(RetryTransientMiddleware::new_with_policy(retry_policy))
         .build();
 
+    let mut headers = HeaderMap::new();
+    headers.insert("User-Agent", USER_AGENT.parse().unwrap());
+
     let res = client
         .get(format!(
             "https://api-v2.soundcloud.com/playlists/{}?client_id={}",
             playlist_id, client_id
         ))
+        .headers(headers)
         .send()
         .await
         .map_err(|e| Error::SoundcloudRequestError(e))?;
@@ -45,11 +53,15 @@ pub async fn fetch_track_info(client_id: String, track_id: u64) -> Result<Track,
         .with(RetryTransientMiddleware::new_with_policy(retry_policy))
         .build();
 
+    let mut headers = HeaderMap::new();
+    headers.insert("User-Agent", USER_AGENT.parse().unwrap());
+
     let res = client
         .get(format!(
             "https://api-v2.soundcloud.com/tracks/{}?client_id={}",
             track_id, client_id
         ))
+        .headers(headers)
         .send()
         .await
         .map_err(|e| Error::SoundcloudRequestError(e))?;
@@ -69,6 +81,7 @@ pub async fn fetch_track_info(client_id: String, track_id: u64) -> Result<Track,
 pub async fn fetch_track_stream(
     client_id: String,
     track_url: String,
+    token: String,
 ) -> Result<TrackStreamResponse, Error> {
     let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
     let client = ClientBuilder::new(reqwest::Client::new())
@@ -76,10 +89,15 @@ pub async fn fetch_track_stream(
         .with(RetryTransientMiddleware::new_with_policy(retry_policy))
         .build();
 
+    let mut headers = HeaderMap::new();
+    headers.insert("User-Agent", USER_AGENT.parse().unwrap());
+    headers.insert("Authorization", format!("Oauth {}", token).parse().unwrap());
+
     let url = format!("{}?client_id={}", track_url, client_id);
 
     let res = client
         .get(url)
+        .headers(headers)
         .send()
         .await
         .map_err(|e| Error::SoundcloudRequestError(e))?;
