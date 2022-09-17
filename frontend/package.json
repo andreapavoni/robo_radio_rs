@@ -1,0 +1,22 @@
+{
+  "private": true,
+  "main": "index.js",
+  "devDependencies": {
+    "autoprefixer": "^10.4.4",
+    "esbuild": "^0.14.36",
+    "esbuild-svelte": "^0.7.0",
+    "howler": "^2.2.3",
+    "phoenix": "^1.6.11",
+    "postcss": "^8.4.12",
+    "postcss-import": "^14.1.0",
+    "svelte": "^3.47.0",
+    "svelte-preprocess": "^4.10.6",
+    "tailwindcss": "^3.0.24"
+  },
+  "dependencies": {},
+  "scripts": {
+    "deploy": "NODE_ENV=production tailwindcss --postcss --minify --input=css/app.css --output=../assets/app.css",
+    "build": "node build.js --deploy",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

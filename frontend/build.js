@@ -1,0 +1,52 @@
+const esbuild = require("esbuild");
+const sveltePlugin = require("esbuild-svelte");
+const sveltePreprocess = require("svelte-preprocess");
+
+const args = process.argv.slice(2);
+const watch = args.includes("--watch");
+const deploy = args.includes("--deploy");
+
+let opts = {
+  entryPoints: ["js/app.js"],
+  bundle: true,
+  target: "es2017",
+  outdir: "../assets",
+  logLevel: "info",
+  external: ["/fonts/*", "/images/*"],
+  plugins: [
+    sveltePlugin({
+      preprocess: sveltePreprocess({
+        postcss: {
+          plugins: [require("tailwindcss"), require("autoprefixer")],
+        },
+      }),
+    }),
+  ],
+};
+
+if (watch) {
+  opts = {
+    ...opts,
+    watch,
+    sourcemap: "inline",
+  };
+}
+
+if (deploy) {
+  opts = {
+    ...opts,
+    minify: true,
+  };
+}
+
+const promise = esbuild.build(opts);
+
+if (watch) {
+  promise.then((_result) => {
+    process.stdin.on("close", () => {
+      process.exit(0);
+    });
+
+    process.stdin.resume();
+  });
+}

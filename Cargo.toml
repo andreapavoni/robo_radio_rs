@@ -8,11 +8,15 @@ license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[profile.release]
+panic = "abort"
+
 [dependencies]
 tokio = { version = "1", features = ["full"] }
 
 # Web framework
 axum = "0.5"
+axum-extra = {version = "0.3", features = ["spa"]}
 
 # JSON handling
 serde = { version = "1.0", features = ["derive"] }
@@ -23,7 +27,7 @@ reqwest = { version = "0.11", features = ["json"] }
 reqwest-middleware = "0.1.1"
 reqwest-retry = "0.1"
 
-# Random helpers
+# Random number generator (used to shuffle vecs)
 rand = "0.8.5"
 
 

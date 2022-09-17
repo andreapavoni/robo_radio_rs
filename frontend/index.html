@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="radio.pavonz is 24/7 automatic web radio. what you listen is the same for all listeners"
+    />
+    <meta
+      name="keywords"
+      content="radio, pavonz, web radio, house music, tech house, electro, techno, music, listening"
+    />
+    <meta name="author" content="Andrea pavonz Pavoni" />
+    <meta
+      name="og:title"
+      property="og:title"
+      content="radio.pavonz 24/7 automatic web radio with house music"
+    />
+    <title data-suffix="">radio.pavonz.com</title>
+    <link phx-track-static rel="stylesheet" href="/assets/app.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      defer
+      phx-track-static
+      type="text/javascript"
+      src="/assets/app.js"
+    ></script>
+  </head>
+  <body>
+    <main class="container">
+      <p class="alert alert-info" role="alert"></p>
+      <p class="alert alert-danger" role="alert"></p>
+      <!-- Top Info -->
+      <div id="title">
+        <a
+          id="track"
+          title="open song on soundcloud.com"
+          href=""
+          target="_blank"
+          rel="noopener noreferrer"
+        ></a>
+        <a
+          id="artist"
+          title="open user profile on SoundCloud"
+          href=""
+          target="_blank"
+          rel="noopener noreferrer"
+        ></a>
+        <div id="timer" title="Elapsed time">0:00</div>
+        <div id="duration" title="Remaining time">0:00</div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controlsOuter">
+        <div class="controlsInner">
+          <div id="loading"></div>
+          <div class="btn" id="playBtn"></div>
+          <div class="btn" id="pauseBtn"></div>
+        </div>
+        <div class="btn" id="volumeBtn"></div>
+        <div id="listeners" title="Current listeners">0</div>
+      </div>
+
+      <!-- Progress -->
+      <div id="waveform"></div>
+      <div id="bar"></div>
+      <div id="progress"></div>
+
+      <!-- Volume -->
+      <div id="volume" class="fadeout">
+        <div id="barFull" class="bar"></div>
+        <div id="barEmpty" class="bar"></div>
+        <div id="sliderBtn"></div>
+      </div>
+    </main>
+    <footer
+      class="absolute bottom-0 w-full text-left bg-gray-800/5 border-gray-200 text-sm px-3 py-2 pin-b text-gray-400"
+    >
+      &copy;2022 - a
+      <a href="https://pavonz.com" target="_blank" rel="noopener noreferrer"
+        >pavonz</a
+      >
+      joint - tracks from
+      <a href="https://soundcloud.com" target="_blank" rel="noopener noreferrer"
+        >soundcloud.com</a
+      >
+    </footer>
+    <script
+      data-goatcounter="https://radio.goatcounter.com/count"
+      async
+      src="//gc.zgo.at/count.js"
+    ></script>
+  </body>
+</html>
