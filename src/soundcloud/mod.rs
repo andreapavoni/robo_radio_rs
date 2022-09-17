@@ -1,4 +1,4 @@
-use crate::errors::Error;
+use crate::error::Error;
 use std::convert::From;
 
 use self::client::{
@@ -7,20 +7,18 @@ use self::client::{
 
 mod client;
 
-#[derive(Debug)]
-pub struct ApiClient {
-    pub client_id: String,
-}
+#[derive(Debug, Clone)]
+pub struct ApiClient {}
 
 impl ApiClient {
-    pub fn new(client_id: String) -> Self {
-        ApiClient { client_id }
+    pub fn new() -> Self {
+        ApiClient {}
     }
 
-    pub async fn get_track(&self, track_id: u64) -> Result<Track, Error> {
-        let mut track = fetch_track_info(self.client_id.clone(), track_id).await?;
+    pub async fn get_track(&self, client_id: String, track_id: u64) -> Result<Track, Error> {
+        let mut track = fetch_track_info(client_id.clone(), track_id).await?;
         let track_stream = fetch_track_stream(
-            self.client_id.clone(),
+            client_id.clone(),
             track.url.unwrap(),
             track.token.as_ref().unwrap().to_string(),
         )
@@ -29,8 +27,12 @@ impl ApiClient {
         Ok(track.clone())
     }
 
-    pub async fn get_playlist(&self, playlist_id: String) -> Result<Playlist, Error> {
-        fetch_playlist_tracks(self.client_id.clone(), playlist_id).await
+    pub async fn get_playlist(
+        &self,
+        client_id: String,
+        playlist_id: String,
+    ) -> Result<Playlist, Error> {
+        fetch_playlist_tracks(client_id.clone(), playlist_id).await
     }
 }
 

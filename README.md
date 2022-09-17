@@ -10,11 +10,15 @@ Planned TODO:
   - [x] fetch playlist info
   - [x] fetch track info
   - [x] fetch track stream
-- [ ] media player
-  - [ ] start a new song after the duration of the previous one is elapsed
+- [x] media player
+  - [x] load playlist and randomize its tracks
+  - [x] rotate to next track (or reload playlist again)
 - [ ] http server
   - [ ] wrap app-state
   - [ ] serve static assets
   - [ ] websockets
+    - [ ] keep track of current listeners
+    - [ ] broadcast new track when last one's duration has elapsed
+- [ ] logging
 - [ ] improved error handling (`anyhow` + `thiserror` ?)
 - [ ] testing (mocks for external API calls)

@@ -23,4 +23,7 @@ reqwest = { version = "0.11", features = ["json"] }
 reqwest-middleware = "0.1.1"
 reqwest-retry = "0.1"
 
+# Random helpers
+rand = "0.8.5"
+
 

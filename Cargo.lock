@@ -866,6 +866,7 @@ name = "robo_radio_rs"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "rand",
  "reqwest",
  "reqwest-middleware",
  "reqwest-retry",
