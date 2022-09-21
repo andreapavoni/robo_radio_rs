@@ -13,9 +13,11 @@ panic = "abort"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
+tokio-stream = "0.1"
+futures = "0.3"
 
 # Web framework
-axum = "0.5"
+axum ={version = "0.5", features = ["ws", "headers", "json"]}
 axum-extra = {version = "0.3", features = ["spa"]}
 
 # JSON handling
@@ -29,5 +31,11 @@ reqwest-retry = "0.1"
 
 # Random number generator (used to shuffle vecs)
 rand = "0.8.5"
+
+# Date and time
+chrono = {version = "0.4", features = ["serde"]}
+
+# Uuid
+uuid = { version = "1.1", features = ["serde", "v4"]}
 
 

@@ -5,6 +5,8 @@ use self::client::{
     fetch_playlist_tracks, fetch_track_info, fetch_track_stream, PlaylistResponse, TrackResponse,
 };
 
+use serde::Serialize;
+
 mod client;
 
 #[derive(Debug, Clone)]
@@ -55,7 +57,7 @@ impl From<PlaylistResponse> for Playlist {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Track {
     pub id: u64,
     pub permalink_url: Option<String>,

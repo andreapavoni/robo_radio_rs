@@ -5,6 +5,7 @@ pub enum Error {
     SoundcloudJsonParseError(String),
     SoundcloudRequestError(MiddlewareReqwestError),
     SoundcloudResponseError(u16),
+    WebSocketError(axum::Error),
 }
 
 impl std::error::Error for Error {}
@@ -20,6 +21,9 @@ impl std::fmt::Display for Error {
             }
             Error::SoundcloudResponseError(err) => {
                 write!(f, "Soundcloud API error: status {}", err)
+            }
+            Error::WebSocketError(err) => {
+                write!(f, "WebSocket error: {:?}", err)
             }
         }
     }

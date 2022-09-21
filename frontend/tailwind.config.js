@@ -1,7 +1,7 @@
 module.exports = {
 	mode: 'jit',
 	content: [
-    "../lib/*_web/**/*.*ex",
+    "./*.html",
     "./js/**/*.js",
 		"./js/components/*.svelte"
   ],

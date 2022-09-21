@@ -1,10 +1,43 @@
+use chrono::{DateTime, Utc};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
+use serde::Serialize;
 
 use crate::{
     error::Error,
     soundcloud::{ApiClient, Track},
 };
+
+#[derive(Debug, Clone, Serialize)]
+pub struct Playback {
+    pub started_at: DateTime<Utc>,
+    pub id: u64,
+    pub permalink_url: String,
+    // pub artwork_url: String,
+    pub duration: u64,
+    pub title: String,
+    pub artist: String,
+    pub artist_permalink: String,
+    pub url: String,
+    pub token: String,
+}
+
+impl Playback {
+    pub fn new(track: Track) -> Self {
+        Self {
+            started_at: Utc::now(),
+            id: track.id,
+            permalink_url: track.permalink_url.unwrap(),
+            // artwork_url: track.artwork_url.unwrap(),
+            duration: track.duration.unwrap(),
+            title: track.title.unwrap(),
+            artist: track.artist.unwrap(),
+            artist_permalink: track.artist_permalink.unwrap(),
+            url: track.url.unwrap(),
+            token: track.token.unwrap(),
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct MediaPlayer {
@@ -12,7 +45,7 @@ pub struct MediaPlayer {
     client_id: String,
     api: ApiClient,
     tracks_ids: Vec<u64>,
-    pub current_track: Option<Track>,
+    pub playback: Option<Playback>,
 }
 
 impl MediaPlayer {
@@ -20,7 +53,7 @@ impl MediaPlayer {
         Self {
             client_id,
             tracks_ids: vec![],
-            current_track: None,
+            playback: None,
             api,
             playlist_id: None,
         }
@@ -42,7 +75,7 @@ impl MediaPlayer {
     pub async fn load_next_track(&mut self) -> Result<(), Error> {
         if let Some(track_id) = self.tracks_ids.pop() {
             let track = self.api.get_track(self.client_id.clone(), track_id).await?;
-            self.current_track = Some(track);
+            self.playback = Some(Playback::new(track));
         } else {
             self.load_playlist(self.playlist_id.as_ref().unwrap().to_string())
                 .await?;
