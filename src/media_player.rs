@@ -49,12 +49,12 @@ pub struct MediaPlayer {
 }
 
 impl MediaPlayer {
-    pub fn new(client_id: String, api: ApiClient) -> Self {
+    pub fn new(client_id: String) -> Self {
         Self {
             client_id,
             tracks_ids: vec![],
             playback: None,
-            api,
+            api: ApiClient::new(),
             playlist_id: None,
         }
     }
