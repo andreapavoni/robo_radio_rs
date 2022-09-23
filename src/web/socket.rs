@@ -47,7 +47,10 @@ pub async fn websocket_connection(ws: WebSocket, station: Station) {
         .await;
 
     let current_track = station.lock().await.current_track().await;
-    println!("current_track inside loop {:?}", current_track.title);
+    println!(
+        "current track started at {:?}: {:?}",
+        current_track.started_at, current_track.title
+    );
 
     let notification = Message::Text(serde_json::json!({ "payload": current_track }).to_string());
     let _ = client_sender.send(Ok(notification));

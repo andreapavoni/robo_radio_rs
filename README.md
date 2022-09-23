@@ -13,12 +13,12 @@ Planned TODO:
 - [x] media player
   - [x] load playlist and randomize its tracks
   - [x] rotate to next track (or reload playlist again)
-- [ ] http server
-  - [ ] wrap app-state
-  - [ ] serve static assets
-  - [ ] websockets
-    - [ ] keep track of current listeners
-    - [ ] broadcast new track when last one's duration has elapsed
+- [x] http server
+  - [x] wrap app-state
+  - [x] serve static assets
+  - [x] websockets
+    - [x] keep track of current listeners
+    - [x] broadcast new track when last one's duration has elapsed
 - [ ] logging
 - [ ] improved error handling (`anyhow` + `thiserror` ?)
 - [ ] testing (mocks for external API calls)

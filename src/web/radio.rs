@@ -51,7 +51,7 @@ pub async fn new_station(client_id: String, playlist_id: String) -> Result<Stati
 pub async fn go_live(station: Station) {
     loop {
         let current = station.lock().await.current_track().await;
-        println!("new track: {:?}", current.title);
+        println!("new track at {:?}: {:?}", current.started_at, current.title);
 
         send_broadcast(
             Message::Text(serde_json::json!({ "payload": current }).to_string()),

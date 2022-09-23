@@ -54,17 +54,15 @@ import Player from "./player";
 
 let player = new Player();
 
-let socket = new WebSocket("ws://127.0.0.1:3000/socket/websocket");
+let protocol = location.protocol.match(/^https/) ? "wss" : "ws";
+let socket = new WebSocket(`${protocol}://${location.host}/socket/websocket`);
 
-socket.onopen = function () {
-  socket.send("hello from the client");
-};
+console.log(`${protocol}://${location.host}/socket/websocket`);
+
+socket.onopen = function () {};
 
 socket.onmessage = function (message) {
-  console.log("player_status", player.status);
-
   let data = JSON.parse(message.data);
-  console.log("============= received: ", data);
   player.load(data.payload);
 
   if (player.status == "playing") {
