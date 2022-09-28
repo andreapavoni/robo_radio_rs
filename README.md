@@ -19,6 +19,6 @@ Planned TODO:
   - [x] websockets
     - [x] keep track of current listeners
     - [x] broadcast new track when last one's duration has elapsed
-- [ ] logging
+- [x] logging/tracing
 - [ ] improved error handling (`anyhow` + `thiserror` ?)
 - [ ] testing (mocks for external API calls)

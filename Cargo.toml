@@ -16,9 +16,10 @@ tokio = { version = "1", features = ["full"] }
 tokio-stream = "0.1"
 futures = "0.3"
 
-# Web framework
+# Web & HTTP stuff
 axum ={version = "0.5", features = ["ws", "headers", "json"]}
 axum-extra = {version = "0.3", features = ["spa"]}
+tower-http = { version = "0.3.0", features = ["trace"] }
 
 # JSON handling
 serde = { version = "1.0", features = ["derive"] }
@@ -37,5 +38,9 @@ chrono = {version = "0.4", features = ["serde"]}
 
 # Uuid
 uuid = { version = "1.1", features = ["serde", "v4"]}
+
+# Logging & tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 

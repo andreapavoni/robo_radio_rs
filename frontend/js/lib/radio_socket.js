@@ -55,9 +55,9 @@ import Player from "./player";
 let player = new Player();
 
 let protocol = location.protocol.match(/^https/) ? "wss" : "ws";
-let socket = new WebSocket(`${protocol}://${location.host}/socket/websocket`);
+let socket = new WebSocket(`${protocol}://${location.host}/ws`);
 
-console.log(`${protocol}://${location.host}/socket/websocket`);
+console.log(`${protocol}://${location.host}/ws`);
 
 socket.onopen = function () {};
 
