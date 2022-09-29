@@ -9,7 +9,7 @@ export default class WS {
     pongTimeout = 10000,
     reconnectTimeout = 2000,
     pingMsg = "heartbeat",
-    repeatLimit = null
+    repeatLimit = 50
   ) {
     this.opts = {
       url: url,
@@ -23,7 +23,7 @@ export default class WS {
     this.ws = null;
     this.repeat = 0;
 
-    // override hook function
+    // override hook functions
     this.onclose = () => {};
     this.onerror = () => {};
     this.onopen = () => {};

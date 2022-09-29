@@ -15,8 +15,8 @@ use tokio::{
 // Shared station
 #[derive(Debug, Clone)]
 pub struct Station {
-    pub media_player: MediaPlayer,
-    pub listeners: Clients,
+    media_player: MediaPlayer,
+    listeners: Clients,
 }
 
 impl Station {
@@ -41,6 +41,24 @@ impl Station {
     pub async fn next_track(&mut self) -> Result<(), Error> {
         self.media_player.load_next_track().await
     }
+
+    async fn notify_listeners_count(&mut self) {
+        broadcast_message(
+            Message::Text(
+                serde_json::json!({"event": "listeners", "data": self.listeners.keys().count()})
+                    .to_string(),
+            ),
+            &self.listeners,
+        )
+        .await;
+    }
+
+    async fn build_current_track_msg(&self) -> Message {
+        Message::Text(
+            serde_json::json!({"event": "track", "data": self.clone().current_track().await})
+                .to_string(),
+        )
+    }
 }
 
 #[async_trait]
@@ -48,22 +66,18 @@ impl WebSocketHandler for Station {
     async fn on_connect(&mut self, client: &Client) {
         self.listeners.insert(client.clone().id, client.clone());
 
-        let current_track = self.current_track().await;
-        tracing::debug!(
-            "notify client on current track started at {:?}: {:?}",
-            current_track.started_at,
-            current_track.title
-        );
+        // Notify clients with listeners count
+        self.notify_listeners_count().await;
 
         // Notify client with the current playing track
-        let notification = Message::Text(
-            serde_json::json!({"event": "new_track", "data": current_track}).to_string(),
-        );
-        let _ = client.clone().sender.send(Ok(notification));
+        let _ = client
+            .clone()
+            .send_message(self.build_current_track_msg().await);
     }
 
     async fn on_disconnect(&mut self, client: &Client) {
         self.listeners.remove(&client.id);
+        self.notify_listeners_count().await;
         tracing::info!("client disconnected: {}", client.id);
     }
 
@@ -74,22 +88,20 @@ pub type StationService = Arc<Mutex<Station>>;
 
 pub async fn go_live(service: StationService) {
     loop {
-        let current_track = service.lock().await.current_track().await;
+        let track = service.lock().await.current_track().await;
         tracing::info!(
             "starting new track at {:?}: {:?}",
-            current_track.started_at,
-            current_track.title
+            track.started_at,
+            track.title
         );
 
         broadcast_message(
-            Message::Text(
-                serde_json::json!({"event": "new_track", "data": current_track}).to_string(),
-            ),
+            service.lock().await.build_current_track_msg().await,
             &service.lock().await.listeners,
         )
         .await;
 
-        let duration = Duration::from_millis(current_track.duration);
+        let duration = Duration::from_millis(track.duration);
         sleep(duration).await;
         let _ = service.lock().await.next_track().await;
     }
