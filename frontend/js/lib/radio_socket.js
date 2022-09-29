@@ -57,9 +57,9 @@ let player = new Player();
 let protocol = location.protocol.match(/^https/) ? "wss" : "ws";
 let socket = new WebSocket(`${protocol}://${location.host}/ws`);
 
-console.log(`${protocol}://${location.host}/ws`);
-
-socket.onopen = function () {};
+socket.onopen = function () {
+  socket.send("PING");
+};
 
 socket.onmessage = function (message) {
   let data = JSON.parse(message.data);

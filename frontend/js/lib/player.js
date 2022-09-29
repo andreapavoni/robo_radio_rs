@@ -37,7 +37,7 @@ let wave = new SiriWave({
   speed: 0.02,
   amplitude: 0.7,
   frequency: 2,
-  color: "#bb71f3",
+  color: "#CC3A00",
 });
 
 // Includes all methods for playing, skipping, updating the display, etc.

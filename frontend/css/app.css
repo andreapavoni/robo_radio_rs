@@ -18,17 +18,12 @@ body {
   padding: 0;
   margin: 0;
   overflow: hidden;
-  background: #290346;
-  background: -moz-linear-gradient(-45deg, #290346 0%, #0e194a 100%);
-  background: -webkit-linear-gradient(-45deg, #290346 0%, #0e194a 100%);
-  background: linear-gradient(135deg, #290346 0%, #0e194a 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#290346', endColorstr='#0e194a', GradientType=1);
-  /* background: #bb71f3;
-  background: -moz-linear-gradient(-45deg, #bb71f3 0%, #3d4d91 100%);
-  background: -webkit-linear-gradient(-45deg, #bb71f3 0%, #3d4d91 100%);
-  background: linear-gradient(135deg, #bb71f3 0%, #3d4d91 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#bb71f3', endColorstr='#3d4d91', GradientType=1); */
-  /* font-family: "Helvetica Neue", "Futura", "Trebuchet MS", Arial; */
+  background: #cc3a00;
+  background: -moz-linear-gradient(-45deg, #cc3a00 0%, #f48f01 100%);
+  background: -webkit-linear-gradient(-45deg, #cc3a00 0%, #f48f01 100%);
+  background: linear-gradient(135deg, #cc3a00 0%, #f48f01 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#cc3a00', endColorstr='#f48f01', GradientType=1);
+
   font-family: "Quicksand", sans-serif;
   -webkit-user-select: none;
   user-select: none;
@@ -182,8 +177,9 @@ a:hover {
   left: 0;
   width: 0%;
   height: 0.3rem;
-  background-color: #b368f0;
-  box-shadow: 0.2rem 0 0.3rem #8248b1;
+
+  background-color: #f6a12b;
+  box-shadow: 0.2rem 0 0.3rem #ff7f34;
   border-radius: 0px 0 6px 0px;
   z-index: -1;
 }
