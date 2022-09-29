@@ -100,7 +100,6 @@ async fn handle_received_message(client: &Client, msg: Message, service: &WebSoc
 
     match msg.clone() {
         Message::Text(text) => {
-            tracing::debug!("received message from {}: {:?}", client.id.clone(), text);
             if handle_received_ping(text, &client).await {
                 return;
             }

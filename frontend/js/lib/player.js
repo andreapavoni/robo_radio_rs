@@ -1,5 +1,5 @@
-import SiriWave from "../../vendor/siriwave";
 import { Howl, Howler } from "howler";
+import SiriWave from "../../vendor/siriwave";
 
 // Cache references to DOM elements.
 [

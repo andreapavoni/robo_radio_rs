@@ -56,8 +56,9 @@ impl WebSocketHandler for Station {
         );
 
         // Notify client with the current playing track
-        let notification =
-            Message::Text(serde_json::json!({ "payload": current_track }).to_string());
+        let notification = Message::Text(
+            serde_json::json!({"event": "new_track", "data": current_track}).to_string(),
+        );
         let _ = client.clone().sender.send(Ok(notification));
     }
 
@@ -73,20 +74,22 @@ pub type StationService = Arc<Mutex<Station>>;
 
 pub async fn go_live(service: StationService) {
     loop {
-        let current = service.lock().await.current_track().await;
+        let current_track = service.lock().await.current_track().await;
         tracing::info!(
             "starting new track at {:?}: {:?}",
-            current.started_at,
-            current.title
+            current_track.started_at,
+            current_track.title
         );
 
         broadcast_message(
-            Message::Text(serde_json::json!({ "payload": current }).to_string()),
+            Message::Text(
+                serde_json::json!({"event": "new_track", "data": current_track}).to_string(),
+            ),
             &service.lock().await.listeners,
         )
         .await;
 
-        let duration = Duration::from_millis(current.duration);
+        let duration = Duration::from_millis(current_track.duration);
         sleep(duration).await;
         let _ = service.lock().await.next_track().await;
     }

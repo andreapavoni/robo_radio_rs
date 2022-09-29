@@ -1,48 +1,59 @@
-// We import the CSS which is extracted to its own file by esbuild.
-// Remove this line if you add a your own CSS build pipeline (e.g postcss).
-// import "../css/app.css"
+import Player from "./lib/player";
+import WS from "./lib/ws";
 
-// If you want to use Phoenix channels, run `mix help phx.gen.channel`
-// to get started and then uncomment the line below.
-// import "./user_socket.js"
+let player = new Player();
 
-// You can include dependencies in two ways.
-//
-// The simplest option is to put them in assets/vendor and
-// import them using relative paths:
-//
-//     import "../vendor/some-package.js"
-//
-// Alternatively, you can `npm install some-package --prefix assets` and import
-// them using a path starting with the package name:
-//
-//     import "some-package"
-//
+let protocol = location.protocol.match(/^https/) ? "wss" : "ws";
+let socket = new WS(
+  `${protocol}://${location.host}/ws`,
+  "",
+  15000,
+  10000,
+  2000,
+  "PING"
+);
 
-// Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
-// import "phoenix_html"
+socket.onopen = function () {
+  console.log("connect success");
+  socket.send("hello server");
+};
 
-// Phoenix Socket and LiveView configuration.
-// import {Socket} from "phoenix"
-// import {LiveSocket} from "phoenix_live_view"
+socket.onmessage = function (e) {
+  if (e.data == "PONG") {
+    console.log("PONG");
+    return;
+  }
 
-import "./lib/radio_socket";
-// Import svelte component(s)
-// import App from "./components/App.svelte"
+  try {
+    let evt = JSON.parse(e.data);
 
-// let csrfToken = document
-//   .querySelector("meta[name='csrf-token']")
-//   .getAttribute("content");
+    if (evt.event == "new_track") {
+      player.load(evt.data);
 
-// let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
-// connect if there are any LiveViews on the page
-// liveSocket.connect()
+      if (player.status == "playing") {
+        player.play();
+      }
+    }
 
-// expose liveSocket on window for web console debug logs and latency simulation:
-// >> liveSocket.enableDebug()
-// >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
-// >> liveSocket.disableLatencySim()
-// window.liveSocket = liveSocket
+    if (evt.event == "listeners") {
+      // updated listeners count...
+    }
+  } catch (_err) {
+    console.log(`error: unrecognized message from server: `, e);
+  }
+};
 
-// new App({ target: document.body });
-// new App({target: document.getElementById("radio-player")})
+socket.onclose = function () {
+  console.log("connection closed");
+};
+
+socket.onerror = function (e) {
+  console.log("some error happened", e);
+};
+
+socket.onreconnect = function () {
+  console.log("reconnecting...");
+};
+
+window.addEventListener("resize", player.resize);
+player.resize();
