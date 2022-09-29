@@ -70,20 +70,24 @@ pub struct Track {
     pub token: Option<String>,
 }
 
-impl From<TrackResponse> for Track {
-    fn from(track: TrackResponse) -> Self {
-        let track_url = track
+impl TryFrom<TrackResponse> for Track {
+    type Error = Error;
+
+    fn try_from(track: TrackResponse) -> Result<Self, Error> {
+        let track_url = match track
             .media
             .unwrap()
             .transcodings
             .into_iter()
             .find(|ts| ts.format.protocol == String::from("progressive"))
-            .unwrap()
-            .url;
+        {
+            Some(transcoding) => Some(transcoding.url),
+            _ => return Err(Error::SoundcloudIncompleteTrack(track.title.unwrap())),
+        };
 
         let user = track.user.unwrap();
 
-        Track {
+        Ok(Track {
             id: track.id,
             permalink_url: track.permalink_url,
             artwork_url: track.artwork_url,
@@ -91,8 +95,8 @@ impl From<TrackResponse> for Track {
             title: track.title,
             artist: Some(user.username),
             artist_permalink: Some(user.permalink_url),
-            url: Some(track_url),
+            url: track_url,
             token: track.track_authorization,
-        }
+        })
     }
 }

@@ -1012,6 +1012,7 @@ dependencies = [
 name = "robo_radio_rs"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "axum",
  "axum-extra",
  "chrono",

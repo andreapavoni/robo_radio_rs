@@ -4,10 +4,11 @@ use robo_radio_rs::{
     error::Error,
     web::{
         handlers::{index_handler, websocket_handler},
-        radio::{go_live, new_station},
+        radio::{go_live, Station, StationService},
     },
 };
-use std::{env, net::SocketAddr};
+use std::{env, net::SocketAddr, sync::Arc};
+use tokio::sync::Mutex;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -31,17 +32,18 @@ async fn main() -> Result<(), Error> {
         None => panic!("$ROBO_RADIO_SOUNDCLOUD_PLAYLIST_ID is not set"),
     };
 
-    let station = new_station(client_id, playlist_id).await?;
+    let station = Station::new(client_id, playlist_id).await?;
+    let station_service: StationService = Arc::new(Mutex::new(station));
 
     let app = Router::new()
         .route("/", get(index_handler))
         .route("/ws", get(websocket_handler))
         .merge(SpaRouter::new("/assets", "assets"))
         .layer(TraceLayer::new_for_http())
-        .layer(Extension(station.clone()));
+        .layer(Extension(station_service.clone()));
 
     tokio::spawn(async move {
-        go_live(station.clone()).await;
+        go_live(station_service.clone()).await;
     });
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));

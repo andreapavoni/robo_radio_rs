@@ -1,12 +1,11 @@
-use chrono::{DateTime, Utc};
-use rand::seq::SliceRandom;
-use rand::thread_rng;
-use serde::Serialize;
-
 use crate::{
     error::Error,
     soundcloud::{ApiClient, Track},
 };
+use chrono::{DateTime, Utc};
+use rand::seq::SliceRandom;
+use rand::thread_rng;
+use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Playback {
@@ -74,6 +73,7 @@ impl MediaPlayer {
 
     pub async fn load_next_track(&mut self) -> Result<(), Error> {
         if let Some(track_id) = self.tracks_ids.pop() {
+            // TODO: go to next track if getting the next one fails
             let track = self.api.get_track(self.client_id.clone(), track_id).await?;
             self.playback = Some(Playback::new(track));
         } else {

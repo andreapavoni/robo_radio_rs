@@ -5,7 +5,9 @@ pub enum Error {
     SoundcloudJsonParseError(String),
     SoundcloudRequestError(MiddlewareReqwestError),
     SoundcloudResponseError(u16),
+    SoundcloudIncompleteTrack(String),
     WebSocketError(axum::Error),
+    PubSubError(String),
 }
 
 impl std::error::Error for Error {}
@@ -24,6 +26,16 @@ impl std::fmt::Display for Error {
             }
             Error::WebSocketError(err) => {
                 write!(f, "WebSocket error: {:?}", err)
+            }
+            Error::SoundcloudIncompleteTrack(track_title) => {
+                write!(
+                    f,
+                    "Soundcloud API error: incomplete track {:?}",
+                    track_title
+                )
+            }
+            Error::PubSubError(err) => {
+                write!(f, "PubSub error: {}", err)
             }
         }
     }

@@ -71,7 +71,7 @@ pub async fn fetch_track_info(client_id: String, track_id: u64) -> Result<Track,
     }
 
     match res.json::<TrackResponse>().await {
-        Ok(res) => Ok(res.into()),
+        Ok(res) => Ok(res.try_into()?),
         Err(_) => Err(Error::SoundcloudJsonParseError(String::from(
             "TrackResponse",
         ))),

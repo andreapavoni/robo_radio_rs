@@ -12,9 +12,11 @@ license = "MIT"
 panic = "abort"
 
 [dependencies]
+# Async stuff
 tokio = { version = "1", features = ["full"] }
 tokio-stream = "0.1"
 futures = "0.3"
+async-trait = "0.1.57"
 
 # Web & HTTP stuff
 axum ={version = "0.5", features = ["ws", "headers", "json"]}

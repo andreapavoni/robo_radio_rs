@@ -1,3 +1,10 @@
+use super::ws::{Client, Clients, WebSocketHandler};
+use crate::{
+    error::Error,
+    media_player::{MediaPlayer, Playback},
+    web::ws::broadcast_message,
+};
+use async_trait::async_trait;
 use axum::extract::ws::Message;
 use std::{collections::HashMap, sync::Arc};
 use tokio::{
@@ -5,62 +12,82 @@ use tokio::{
     time::{sleep, Duration},
 };
 
-use super::socket::{Client, Clients};
-use crate::{
-    error::Error,
-    media_player::{MediaPlayer, Playback},
-    web::socket::send_broadcast,
-};
-
 // Shared station
 #[derive(Debug, Clone)]
-pub struct Channel {
+pub struct Station {
     pub media_player: MediaPlayer,
     pub listeners: Clients,
 }
 
-impl Channel {
-    pub async fn add_listener(&mut self, client_id: String, client: Client) {
-        self.listeners.insert(client_id, client);
+impl Station {
+    pub async fn new(client_id: String, playlist_id: String) -> Result<Station, Error> {
+        let mut media_player = MediaPlayer::new(client_id);
+        let listeners: Clients = HashMap::new();
+
+        media_player.load_playlist(playlist_id).await?;
+        media_player.load_next_track().await?;
+
+        Ok(Station {
+            listeners,
+            media_player,
+        })
     }
 
-    pub async fn remove_listener(&mut self, client_id: String) {
-        self.listeners.remove(&client_id);
-    }
-
+    // Utils
     pub async fn current_track(&mut self) -> Playback {
         self.media_player.playback.as_ref().unwrap().clone()
     }
+
+    pub async fn next_track(&mut self) -> Result<(), Error> {
+        self.media_player.load_next_track().await
+    }
 }
 
-pub type Station = Arc<Mutex<Channel>>;
+#[async_trait]
+impl WebSocketHandler for Station {
+    async fn on_connect(&mut self, client: &Client) {
+        self.listeners.insert(client.clone().id, client.clone());
 
-pub async fn new_station(client_id: String, playlist_id: String) -> Result<Station, Error> {
-    let mut media_player = MediaPlayer::new(client_id);
-    let listeners: Clients = HashMap::new();
+        let current_track = self.current_track().await;
+        tracing::debug!(
+            "notify client on current track started at {:?}: {:?}",
+            current_track.started_at,
+            current_track.title
+        );
 
-    media_player.load_playlist(playlist_id).await?;
-    media_player.load_next_track().await?;
+        // Notify client with the current playing track
+        let notification =
+            Message::Text(serde_json::json!({ "payload": current_track }).to_string());
+        let _ = client.clone().sender.send(Ok(notification));
+    }
 
-    Ok(Arc::new(Mutex::new(Channel {
-        listeners,
-        media_player,
-    })))
+    async fn on_disconnect(&mut self, client: &Client) {
+        self.listeners.remove(&client.id);
+        tracing::info!("client disconnected: {}", client.id);
+    }
+
+    async fn on_message(&mut self, _client: &Client) {}
 }
 
-pub async fn go_live(station: Station) {
+pub type StationService = Arc<Mutex<Station>>;
+
+pub async fn go_live(service: StationService) {
     loop {
-        let current = station.lock().await.current_track().await;
-        println!("new track at {:?}: {:?}", current.started_at, current.title);
+        let current = service.lock().await.current_track().await;
+        tracing::info!(
+            "starting new track at {:?}: {:?}",
+            current.started_at,
+            current.title
+        );
 
-        send_broadcast(
+        broadcast_message(
             Message::Text(serde_json::json!({ "payload": current }).to_string()),
-            &station.lock().await.listeners,
+            &service.lock().await.listeners,
         )
         .await;
 
         let duration = Duration::from_millis(current.duration);
         sleep(duration).await;
-        let _ = station.lock().await.media_player.load_next_track().await;
+        let _ = service.lock().await.next_track().await;
     }
 }
