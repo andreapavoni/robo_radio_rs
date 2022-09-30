@@ -85,7 +85,7 @@ async fn receive_messages(
         let msg = match result {
             Ok(msg) => msg,
             Err(err) => {
-                tracing::error!("error receiving message from client {}: {}", client.id, err);
+                tracing::error!("error with client {}: {}", client.id, err);
                 break;
             }
         };
