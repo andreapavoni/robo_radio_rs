@@ -1,6 +1,6 @@
 # robo_radio_rs
 
-A Rust implementation for https://radio.pavonz.com
+A Rust implementation of https://radio.pavonz.com (build with Elixir and Phoenix).
 
 ## Current status: WIP
 

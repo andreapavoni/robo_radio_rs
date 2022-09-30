@@ -10,16 +10,17 @@ use robo_radio_rs::{
 use std::{env, net::SocketAddr, sync::Arc};
 use tokio::sync::Mutex;
 use tower_http::trace::TraceLayer;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::EnvFilter::new(
-            std::env::var("RUST_LOG")
-                .unwrap_or_else(|_| "robo_radio_rs=debug,tower_http=debug".into()),
+    FmtSubscriber::builder()
+        .with_env_filter(EnvFilter::new(
+            env::var("RUST_LOG").unwrap_or_else(|_| "robo_radio_rs=info,tower_http=info".into()),
         ))
-        .with(tracing_subscriber::fmt::layer())
+        .with_target(true)
+        .with_ansi(true)
+        .compact()
         .init();
 
     let client_id = match env::var_os("ROBO_RADIO_SOUNDCLOUD_CLIENT_ID") {
@@ -46,7 +47,13 @@ async fn main() -> Result<(), Error> {
         go_live(station_service.clone()).await;
     });
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    // Use "[::]" to listen on both IPv4 (0.0.0.0) and IPv6
+    let srv_host = env::var("HOST").unwrap_or("127.0.0.1".to_string());
+    let srv_port = env::var("PORT").unwrap_or("3000".to_string());
+
+    let addr = format!("{}:{}", srv_host, srv_port)
+        .parse::<SocketAddr>()
+        .unwrap();
     tracing::info!("server started and listening on {}", addr);
 
     axum::Server::bind(&addr)

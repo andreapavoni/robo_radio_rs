@@ -43,8 +43,6 @@ pub trait WebSocketHandler {
 }
 
 pub async fn handle_client_connection(ws: WebSocket, service: WebSocketService) {
-    tracing::debug!("establishing client connection...");
-
     // Split the socket into a sender and receive of messages.
     let (ws_tx, mut ws_rx) = ws.split();
 
@@ -70,8 +68,8 @@ pub async fn handle_client_connection(ws: WebSocket, service: WebSocketService) 
 }
 
 pub async fn broadcast_message(msg: Message, clients: &Clients) {
+    tracing::debug!("sending broadcast message {:#?}", msg.clone());
     for (_id, client) in clients.into_iter() {
-        tracing::debug!("sending broadcast message");
         client.send_message(msg.clone()).await;
     }
     return;
@@ -96,8 +94,7 @@ async fn receive_messages(
 }
 
 async fn handle_received_message(client: &Client, msg: Message, service: &WebSocketService) {
-    tracing::debug!("received message from {}: {:?}", client.id.clone(), msg);
-
+    // tracing::debug!("received message from {}: {:?}", client.id.clone(), msg);
     match msg.clone() {
         Message::Text(text) => {
             if handle_received_ping(text, &client).await {
@@ -106,7 +103,6 @@ async fn handle_received_message(client: &Client, msg: Message, service: &WebSoc
             // TODO: call on_message() on client handler
             service.lock().await.on_message(&client.clone()).await;
         }
-        Message::Close(_) => service.lock().await.on_disconnect(&client.clone()).await,
         _ => {}
     }
 }

@@ -70,9 +70,10 @@ impl WebSocketHandler for Station {
         self.notify_listeners_count().await;
 
         // Notify client with the current playing track
-        let _ = client
+        client
             .clone()
-            .send_message(self.build_current_track_msg().await);
+            .send_message(self.build_current_track_msg().await)
+            .await;
     }
 
     async fn on_disconnect(&mut self, client: &Client) {
@@ -95,11 +96,8 @@ pub async fn go_live(service: StationService) {
             track.title
         );
 
-        broadcast_message(
-            service.lock().await.build_current_track_msg().await,
-            &service.lock().await.listeners,
-        )
-        .await;
+        let msg = service.lock().await.build_current_track_msg().await;
+        broadcast_message(msg, &service.lock().await.listeners).await;
 
         let duration = Duration::from_millis(track.duration);
         sleep(duration).await;

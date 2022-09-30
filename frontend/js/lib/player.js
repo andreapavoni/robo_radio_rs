@@ -122,9 +122,10 @@ export default class Player {
 
     self.currentData = song;
     self.currentSong = new Howl({
-      volume: 0.5,
+      volume: 0.6,
       src: [song.url],
       html5: true, // Force to HTML5 so that the audio can stream in (best for large files).
+      preload: false,
       onplay: function () {
         // Display the duration.
         window.duration.innerHTML =
