@@ -1009,7 +1009,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "robo_radio_rs"
+name = "robo_radio"
 version = "0.1.0"
 dependencies = [
  "async-trait",

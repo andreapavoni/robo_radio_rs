@@ -20,7 +20,7 @@ RUN apt-get update -y \
   && apt-get clean -y \
   && rm -rf /var/lib/apt/lists/*WORKDIR
 
-COPY --from=backend_build /app/target/release/robo_radio_rs /
+COPY --from=backend_build /app/target/release/robo_radio /
 COPY --from=frontend_build /app/assets /assets
 
-CMD ./robo_radio_rs
+CMD ./robo_radio

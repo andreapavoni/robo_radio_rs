@@ -1,4 +1,4 @@
-# robo_radio_rs
+# RoboRadio
 
 A Rust implementation of https://radio.pavonz.com (build with Elixir and Phoenix).
 

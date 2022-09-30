@@ -1,6 +1,6 @@
 use axum::{extract::Extension, routing::get, Router};
 use axum_extra::routing::SpaRouter;
-use robo_radio_rs::{
+use robo_radio::{
     error::Error,
     web::{
         handlers::{index_handler, websocket_handler},
@@ -16,7 +16,7 @@ use tracing_subscriber::{EnvFilter, FmtSubscriber};
 async fn main() -> Result<(), Error> {
     FmtSubscriber::builder()
         .with_env_filter(EnvFilter::new(
-            env::var("RUST_LOG").unwrap_or_else(|_| "robo_radio_rs=info,tower_http=info".into()),
+            env::var("RUST_LOG").unwrap_or_else(|_| "robo_radio=info,tower_http=info".into()),
         ))
         .with_target(true)
         .with_ansi(true)
@@ -48,8 +48,8 @@ async fn main() -> Result<(), Error> {
     });
 
     // Use "[::]" to listen on both IPv4 (0.0.0.0) and IPv6
-    let srv_host = env::var("HOST").unwrap_or("127.0.0.1".to_string());
-    let srv_port = env::var("PORT").unwrap_or("3000".to_string());
+    let srv_host = env::var("ROBO_RADIO_HOST").unwrap_or("127.0.0.1".to_string());
+    let srv_port = env::var("PORT").unwrap_or("8080".to_string());
 
     let addr = format!("{}:{}", srv_host, srv_port)
         .parse::<SocketAddr>()

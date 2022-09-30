@@ -1,5 +1,5 @@
 [package]
-name = "robo_radio_rs"
+name = "robo_radio"
 authors = ["Andrea Pavoni <andrea.pavoni@gmail.com>"]
 version = "0.1.0"
 edition = "2021"
