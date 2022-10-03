@@ -1,6 +1,6 @@
 # RoboRadio
 
-A Rust implementation of https://radio.pavonz.com (build with Elixir and Phoenix).
+A Rust implementation of https://radio.pavonz.com (built with Elixir and Phoenix).
 
 ## Current status: WIP
 
@@ -20,5 +20,7 @@ Planned TODO:
     - [x] keep track of current listeners
     - [x] broadcast new track when last one's duration has elapsed
 - [x] logging/tracing
-- [ ] improved error handling (`anyhow` + `thiserror` ?)
+- [x] improved error handling (`anyhow` + `thiserror` ?)
+- [ ] replace Axum with Warp
+- [ ] auto-update soundcloud's `client_id`
 - [ ] testing (mocks for external API calls)

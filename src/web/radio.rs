@@ -4,6 +4,7 @@ use crate::{
     media_player::{MediaPlayer, Playback},
     web::ws::broadcast_message,
 };
+use anyhow::Result;
 use async_trait::async_trait;
 use axum::extract::ws::Message;
 use std::{collections::HashMap, sync::Arc};
@@ -20,11 +21,11 @@ pub struct Station {
 }
 
 impl Station {
-    pub async fn new(client_id: String, playlist_id: String) -> Result<Station, Error> {
-        let mut media_player = MediaPlayer::new(client_id);
+    pub async fn new(client_id: &str, playlist_id: &str) -> Result<Station, Error> {
+        let mut media_player = MediaPlayer::new(client_id.as_ref());
         let listeners: Clients = HashMap::new();
 
-        media_player.load_playlist(playlist_id).await?;
+        media_player.load_playlist(playlist_id.as_ref()).await?;
         media_player.load_next_track().await?;
 
         Ok(Station {
@@ -44,7 +45,7 @@ impl Station {
 
     async fn notify_listeners_count(&mut self) {
         broadcast_message(
-            Message::Text(
+            &Message::Text(
                 serde_json::json!({"event": "listeners", "data": self.listeners.keys().count()})
                     .to_string(),
             ),
@@ -72,7 +73,7 @@ impl WebSocketHandler for Station {
         // Notify client with the current playing track
         client
             .clone()
-            .send_message(self.build_current_track_msg().await)
+            .send_message(&self.build_current_track_msg().await)
             .await;
     }
 
@@ -97,7 +98,7 @@ pub async fn go_live(service: StationService) {
         );
 
         let msg = service.lock().await.build_current_track_msg().await;
-        broadcast_message(msg, &service.lock().await.listeners).await;
+        broadcast_message(&msg, &service.lock().await.listeners).await;
 
         let duration = Duration::from_millis(track.duration);
         sleep(duration).await;

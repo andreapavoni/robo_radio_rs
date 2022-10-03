@@ -1,4 +1,5 @@
 // use super::radio::Arc<Mutex<impl WebSocketHandler>>;
+use anyhow::Result;
 use async_trait::async_trait;
 use axum::extract::ws::{Message, WebSocket};
 use futures::stream::SplitStream;
@@ -24,8 +25,8 @@ impl Client {
         Client { id, sender }
     }
 
-    pub async fn send_message(&self, msg: Message) {
-        if self.sender.send(Ok(msg)).is_err() {
+    pub async fn send_message(&self, msg: &Message) {
+        if self.sender.send(Ok(msg.clone())).is_err() {
             tracing::error!("error sending message to client: {}", self.id)
         }
     }
@@ -60,17 +61,17 @@ pub async fn handle_client_connection(ws: WebSocket, service: WebSocketService) 
     let client = Client::new(tx.clone());
     tracing::info!("client connected with id: {}", client.id.clone());
 
-    service.lock().await.on_connect(&client.clone()).await;
+    service.lock().await.on_connect(&client).await;
 
-    receive_messages(&mut ws_rx, client.clone(), &service).await;
+    receive_messages(&mut ws_rx, &client, &service).await;
 
     service.lock().await.on_disconnect(&client.clone()).await;
 }
 
-pub async fn broadcast_message(msg: Message, clients: &Clients) {
-    tracing::debug!("sending broadcast message {:#?}", msg.clone());
+pub async fn broadcast_message(msg: &Message, clients: &Clients) {
+    tracing::debug!("sending broadcast message {:#?}", msg);
     for (_id, client) in clients.into_iter() {
-        client.send_message(msg.clone()).await;
+        client.send_message(&msg).await;
     }
     return;
 }
@@ -78,26 +79,25 @@ pub async fn broadcast_message(msg: Message, clients: &Clients) {
 // Private helpers
 async fn receive_messages(
     ws_rx: &mut SplitStream<WebSocket>,
-    client: Client,
+    client: &Client,
     service: &WebSocketService,
 ) {
     while let Some(result) = ws_rx.next().await {
-        let msg = match result {
-            Ok(msg) => msg,
+        match result {
+            Ok(msg) => handle_received_message(&client, &msg, &service).await,
             Err(err) => {
                 tracing::error!("error with client {}: {}", client.id, err);
                 break;
             }
-        };
-        handle_received_message(&client, msg, &service).await;
+        }
     }
 }
 
-async fn handle_received_message(client: &Client, msg: Message, service: &WebSocketService) {
+async fn handle_received_message(client: &Client, msg: &Message, service: &WebSocketService) {
     // tracing::debug!("received message from {}: {:?}", client.id.clone(), msg);
     match msg.clone() {
         Message::Text(text) => {
-            if handle_received_ping(text, &client).await {
+            if handle_received_ping(text.as_str(), &client).await {
                 return;
             }
             // TODO: call on_message() on client handler
@@ -107,11 +107,11 @@ async fn handle_received_message(client: &Client, msg: Message, service: &WebSoc
     }
 }
 
-async fn handle_received_ping(msg: String, client: &Client) -> bool {
+async fn handle_received_ping(msg: &str, client: &Client) -> bool {
     if msg.trim().to_lowercase() == "ping" {
         tracing::debug!("replying to PING from {} with PONG", client.id);
         client
-            .send_message(Message::Text(String::from("PONG")))
+            .send_message(&Message::Text(String::from("PONG")))
             .await;
         return true;
     }

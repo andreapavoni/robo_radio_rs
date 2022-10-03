@@ -1,11 +1,10 @@
-use crate::error::Error;
-use std::convert::From;
-
 use self::client::{
     fetch_playlist_tracks, fetch_track_info, fetch_track_stream, PlaylistResponse, TrackResponse,
 };
-
+use crate::error::Error;
+use anyhow::Result;
 use serde::Serialize;
+use std::convert::From;
 
 mod client;
 
@@ -17,12 +16,12 @@ impl ApiClient {
         ApiClient {}
     }
 
-    pub async fn get_track(&self, client_id: String, track_id: u64) -> Result<Track, Error> {
-        let mut track = fetch_track_info(client_id.clone(), track_id).await?;
+    pub async fn get_track(&self, client_id: &str, track_id: u64) -> Result<Track, Error> {
+        let mut track = fetch_track_info(client_id.as_ref(), track_id).await?;
         let track_stream = fetch_track_stream(
-            client_id.clone(),
-            track.url.unwrap(),
-            track.token.as_ref().unwrap().to_string(),
+            client_id.as_ref(),
+            track.url.unwrap().as_ref(),
+            track.token.as_ref().unwrap(),
         )
         .await?;
         track.url = track_stream.url.clone();
@@ -31,10 +30,10 @@ impl ApiClient {
 
     pub async fn get_playlist(
         &self,
-        client_id: String,
-        playlist_id: String,
+        client_id: &str,
+        playlist_id: &str,
     ) -> Result<Playlist, Error> {
-        fetch_playlist_tracks(client_id.clone(), playlist_id).await
+        fetch_playlist_tracks(&client_id, &playlist_id).await
     }
 }
 

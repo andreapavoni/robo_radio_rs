@@ -1,4 +1,4 @@
-use axum::{extract::Extension, routing::get, Router};
+use axum::{routing::get, Router};
 use axum_extra::routing::SpaRouter;
 use robo_radio::{
     error::Error,
@@ -33,15 +33,14 @@ async fn main() -> Result<(), Error> {
         None => panic!("$ROBO_RADIO_SOUNDCLOUD_PLAYLIST_ID is not set"),
     };
 
-    let station = Station::new(client_id, playlist_id).await?;
+    let station = Station::new(client_id.as_str(), playlist_id.as_str()).await?;
     let station_service: StationService = Arc::new(Mutex::new(station));
 
-    let app = Router::new()
+    let app = Router::with_state(station_service.clone())
         .route("/", get(index_handler))
         .route("/ws", get(websocket_handler))
         .merge(SpaRouter::new("/assets", "assets"))
-        .layer(TraceLayer::new_for_http())
-        .layer(Extension(station_service.clone()));
+        .layer(TraceLayer::new_for_http());
 
     tokio::spawn(async move {
         go_live(station_service.clone()).await;

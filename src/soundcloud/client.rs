@@ -1,19 +1,16 @@
+use super::{Playlist, Track};
+use crate::error::Error;
+use anyhow::Result;
 use reqwest::header::HeaderMap;
 use reqwest_middleware::ClientBuilder;
 use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 use serde::Deserialize;
 use serde_json::Value;
 
-use super::{Playlist, Track};
-use crate::error::Error;
-
 static USER_AGENT: &str =
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:100.0) Gecko/20100101 Firefox/100.0";
 
-pub async fn fetch_playlist_tracks(
-    client_id: String,
-    playlist_id: String,
-) -> Result<Playlist, Error> {
+pub async fn fetch_playlist_tracks(client_id: &str, playlist_id: &str) -> Result<Playlist, Error> {
     let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
     let client = ClientBuilder::new(reqwest::Client::new())
         // Trace HTTP requests. See the tracing crate to make use of these traces.
@@ -46,7 +43,7 @@ pub async fn fetch_playlist_tracks(
     }
 }
 
-pub async fn fetch_track_info(client_id: String, track_id: u64) -> Result<Track, Error> {
+pub async fn fetch_track_info(client_id: &str, track_id: u64) -> Result<Track, Error> {
     let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
     let client = ClientBuilder::new(reqwest::Client::new())
         // Retry failed requests.
@@ -79,9 +76,9 @@ pub async fn fetch_track_info(client_id: String, track_id: u64) -> Result<Track,
 }
 
 pub async fn fetch_track_stream(
-    client_id: String,
-    track_url: String,
-    token: String,
+    client_id: &str,
+    track_url: &str,
+    token: &str,
 ) -> Result<TrackStreamResponse, Error> {
     let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
     let client = ClientBuilder::new(reqwest::Client::new())
