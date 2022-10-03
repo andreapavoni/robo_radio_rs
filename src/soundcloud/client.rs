@@ -1,7 +1,8 @@
 use super::{Playlist, Track};
 use crate::error::Error;
 use anyhow::Result;
-use reqwest::header::HeaderMap;
+use regex::Regex;
+use reqwest::{header::HeaderMap, Response};
 use reqwest_middleware::ClientBuilder;
 use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 use serde::Deserialize;
@@ -11,30 +12,15 @@ static USER_AGENT: &str =
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:100.0) Gecko/20100101 Firefox/100.0";
 
 pub async fn fetch_playlist_tracks(client_id: &str, playlist_id: &str) -> Result<Playlist, Error> {
-    let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
-    let client = ClientBuilder::new(reqwest::Client::new())
-        // Trace HTTP requests. See the tracing crate to make use of these traces.
-        // Retry failed requests.
-        .with(RetryTransientMiddleware::new_with_policy(retry_policy))
-        .build();
-
     let mut headers = HeaderMap::new();
     headers.insert("User-Agent", USER_AGENT.parse().unwrap());
 
-    let res = client
-        .get(format!(
-            "https://api-v2.soundcloud.com/playlists/{}?client_id={}",
-            playlist_id, client_id
-        ))
-        .headers(headers)
-        .send()
-        .await
-        .map_err(Error::SoundcloudRequestError)?;
+    let url = format!(
+        "https://api-v2.soundcloud.com/playlists/{}?client_id={}",
+        playlist_id, client_id
+    );
 
-    if !res.status().is_success() {
-        return Err(Error::SoundcloudResponseError(res.status().as_u16()));
-    }
-
+    let res = http_get(url.as_str(), &headers).await?;
     match res.json::<PlaylistResponse>().await {
         Ok(res) => Ok(res.into()),
         Err(_) => Err(Error::SoundcloudJsonParseError(String::from(
@@ -44,29 +30,15 @@ pub async fn fetch_playlist_tracks(client_id: &str, playlist_id: &str) -> Result
 }
 
 pub async fn fetch_track_info(client_id: &str, track_id: u64) -> Result<Track, Error> {
-    let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
-    let client = ClientBuilder::new(reqwest::Client::new())
-        // Retry failed requests.
-        .with(RetryTransientMiddleware::new_with_policy(retry_policy))
-        .build();
-
     let mut headers = HeaderMap::new();
     headers.insert("User-Agent", USER_AGENT.parse().unwrap());
 
-    let res = client
-        .get(format!(
-            "https://api-v2.soundcloud.com/tracks/{}?client_id={}",
-            track_id, client_id
-        ))
-        .headers(headers)
-        .send()
-        .await
-        .map_err(Error::SoundcloudRequestError)?;
+    let url = format!(
+        "https://api-v2.soundcloud.com/tracks/{}?client_id={}",
+        track_id, client_id
+    );
 
-    if !res.status().is_success() {
-        return Err(Error::SoundcloudResponseError(res.status().as_u16()));
-    }
-
+    let res = http_get(url.as_str(), &headers).await?;
     match res.json::<TrackResponse>().await {
         Ok(res) => Ok(res.try_into()?),
         Err(_) => Err(Error::SoundcloudJsonParseError(String::from(
@@ -80,21 +52,69 @@ pub async fn fetch_track_stream(
     track_url: &str,
     token: &str,
 ) -> Result<TrackStreamResponse, Error> {
-    let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
-    let client = ClientBuilder::new(reqwest::Client::new())
-        // Retry failed requests.
-        .with(RetryTransientMiddleware::new_with_policy(retry_policy))
-        .build();
-
     let mut headers = HeaderMap::new();
     headers.insert("User-Agent", USER_AGENT.parse().unwrap());
     headers.insert("Authorization", format!("Oauth {}", token).parse().unwrap());
 
     let url = format!("{}?client_id={}", track_url, client_id);
 
+    let res = http_get(url.as_str(), &headers).await?;
+    match res.json::<TrackStreamResponse>().await {
+        Ok(res) => Ok(res),
+        Err(_) => Err(Error::SoundcloudJsonParseError(String::from(
+            "TrackResponse",
+        ))),
+    }
+}
+
+pub async fn fetch_new_client_id() -> Result<String, Error> {
+    let url = "https://soundcloud.com";
+    let mut headers = HeaderMap::new();
+    headers.insert("User-Agent", USER_AGENT.parse().unwrap());
+
+    let content = http_get(url, &headers)
+        .await?
+        .text_with_charset("utf-8")
+        .await
+        .map_err(Error::SoundcloudTextResponseError)?;
+
+    find_client_id(content).await
+}
+
+async fn find_client_id(page: String) -> Result<String, Error> {
+    let re_src = Regex::new(r#"<script[^>]+src="([^"]+)""#).unwrap();
+    let re_client_id = Regex::new(r#"client_id\s*:\s*"([0-9a-zA-Z]{32})""#).unwrap();
+    for src in re_src.captures_iter(page.as_str()) {
+        let url = &src[1];
+
+        let mut headers = HeaderMap::new();
+        headers.insert("User-Agent", USER_AGENT.parse().unwrap());
+
+        let js = http_get(url, &headers)
+            .await?
+            .text_with_charset("utf-8")
+            .await
+            .map_err(Error::SoundcloudTextResponseError)?;
+
+        if let Some(client_id) = re_client_id.find(js.as_str()) {
+            return Ok(client_id.as_str().to_string());
+        }
+    }
+
+    Err(Error::SoundcloudJsonParseError(String::from(
+        "SoundCloud client_id not found",
+    )))
+}
+
+async fn http_get(url: &str, headers: &HeaderMap) -> Result<Response, Error> {
+    let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
+    let client = ClientBuilder::new(reqwest::Client::new())
+        .with(RetryTransientMiddleware::new_with_policy(retry_policy))
+        .build();
+
     let res = client
         .get(url)
-        .headers(headers)
+        .headers(headers.clone())
         .send()
         .await
         .map_err(Error::SoundcloudRequestError)?;
@@ -103,12 +123,7 @@ pub async fn fetch_track_stream(
         return Err(Error::SoundcloudResponseError(res.status().as_u16()));
     }
 
-    match res.json::<TrackStreamResponse>().await {
-        Ok(res) => Ok(res),
-        Err(_) => Err(Error::SoundcloudJsonParseError(String::from(
-            "TrackResponse",
-        ))),
-    }
+    Ok(res)
 }
 
 #[derive(Default, Debug, Clone, Deserialize)]
