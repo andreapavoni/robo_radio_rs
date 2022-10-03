@@ -1,0 +1,33 @@
+[tasks.frontend_clean]
+script = "rm $CARGO_MAKE_WORKING_DIRECTORY/assets/*"
+
+[tasks.frontend]
+script = '''
+cd ./frontend # cargo-make will revert to original directory after script execution
+npm run build && npm run deploy
+'''
+dependencies = ["frontend_clean"]
+
+[tasks.clippy]
+command = "cargo"
+args = ["clippy"]
+
+[tasks.clippy_fix]
+command = "cargo"
+args = ["clippy", "--fix"]
+
+[tasks.test]
+command = "cargo"
+args = ["test"]
+
+[tasks.build]
+command = "cargo"
+args = ["build"]
+
+[tasks.release]
+command = "cargo"
+args = ["build", "--release"]
+
+[tasks.clean]
+command = "cargo"
+args = ["clean"]

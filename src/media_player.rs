@@ -29,7 +29,7 @@ impl Playback {
             id: track.id,
             permalink_url: track.permalink_url.as_ref().unwrap().clone(),
             // artwork_url: track.artwork_url.as_ref().unwrap().clone(),
-            duration: track.duration.as_ref().unwrap().clone(),
+            duration: *track.duration.as_ref().unwrap(),
             title: track.title.as_ref().unwrap().clone(),
             artist: track.artist.as_ref().unwrap().clone(),
             artist_permalink: track.artist_permalink.as_ref().unwrap().clone(),
@@ -73,7 +73,7 @@ impl MediaPlayer {
     }
 
     pub async fn load_next_track(&mut self) -> Result<(), Error> {
-        if self.tracks_ids.len() < 1 {
+        if self.tracks_ids.is_empty() {
             self.load_playlist(self.clone().playlist_id.as_ref().unwrap().as_str())
                 .await?;
         }

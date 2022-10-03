@@ -47,8 +47,8 @@ async fn main() -> Result<(), Error> {
     });
 
     // Use "[::]" to listen on both IPv4 (0.0.0.0) and IPv6
-    let srv_host = env::var("ROBO_RADIO_HOST").unwrap_or("127.0.0.1".to_string());
-    let srv_port = env::var("PORT").unwrap_or("8080".to_string());
+    let srv_host = env::var("ROBO_RADIO_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+    let srv_port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
 
     let addr = format!("{}:{}", srv_host, srv_port)
         .parse::<SocketAddr>()

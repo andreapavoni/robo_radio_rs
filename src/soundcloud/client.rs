@@ -29,7 +29,7 @@ pub async fn fetch_playlist_tracks(client_id: &str, playlist_id: &str) -> Result
         .headers(headers)
         .send()
         .await
-        .map_err(|e| Error::SoundcloudRequestError(e))?;
+        .map_err(Error::SoundcloudRequestError)?;
 
     if !res.status().is_success() {
         return Err(Error::SoundcloudResponseError(res.status().as_u16()));
@@ -61,7 +61,7 @@ pub async fn fetch_track_info(client_id: &str, track_id: u64) -> Result<Track, E
         .headers(headers)
         .send()
         .await
-        .map_err(|e| Error::SoundcloudRequestError(e))?;
+        .map_err(Error::SoundcloudRequestError)?;
 
     if !res.status().is_success() {
         return Err(Error::SoundcloudResponseError(res.status().as_u16()));
@@ -97,7 +97,7 @@ pub async fn fetch_track_stream(
         .headers(headers)
         .send()
         .await
-        .map_err(|e| Error::SoundcloudRequestError(e))?;
+        .map_err(Error::SoundcloudRequestError)?;
 
     if !res.status().is_success() {
         return Err(Error::SoundcloudResponseError(res.status().as_u16()));

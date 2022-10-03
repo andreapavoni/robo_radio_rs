@@ -70,10 +70,9 @@ pub async fn handle_client_connection(ws: WebSocket, service: WebSocketService) 
 
 pub async fn broadcast_message(msg: &Message, clients: &Clients) {
     tracing::debug!("sending broadcast message {:#?}", msg);
-    for (_id, client) in clients.into_iter() {
-        client.send_message(&msg).await;
+    for (_id, client) in clients.iter() {
+        client.send_message(msg).await;
     }
-    return;
 }
 
 // Private helpers
@@ -84,7 +83,7 @@ async fn receive_messages(
 ) {
     while let Some(result) = ws_rx.next().await {
         match result {
-            Ok(msg) => handle_received_message(&client, &msg, &service).await,
+            Ok(msg) => handle_received_message(client, &msg, service).await,
             Err(err) => {
                 tracing::error!("error with client {}: {}", client.id, err);
                 break;
@@ -95,15 +94,11 @@ async fn receive_messages(
 
 async fn handle_received_message(client: &Client, msg: &Message, service: &WebSocketService) {
     // tracing::debug!("received message from {}: {:?}", client.id.clone(), msg);
-    match msg.clone() {
-        Message::Text(text) => {
-            if handle_received_ping(text.as_str(), &client).await {
-                return;
-            }
-            // TODO: call on_message() on client handler
-            service.lock().await.on_message(&client.clone()).await;
+    if let Message::Text(text) = msg.clone() {
+        if handle_received_ping(text.as_str(), client).await {
+            return;
         }
-        _ => {}
+        service.lock().await.on_message(&client.clone()).await;
     }
 }
 

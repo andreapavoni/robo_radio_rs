@@ -17,14 +17,14 @@ impl ApiClient {
     }
 
     pub async fn get_track(&self, client_id: &str, track_id: u64) -> Result<Track, Error> {
-        let mut track = fetch_track_info(client_id.as_ref(), track_id).await?;
+        let mut track = fetch_track_info(client_id, track_id).await?;
         let track_stream = fetch_track_stream(
-            client_id.as_ref(),
+            client_id,
             track.url.unwrap().as_ref(),
             track.token.as_ref().unwrap(),
         )
         .await?;
-        track.url = track_stream.url.clone();
+        track.url = track_stream.url;
         Ok(track.clone())
     }
 
@@ -33,7 +33,13 @@ impl ApiClient {
         client_id: &str,
         playlist_id: &str,
     ) -> Result<Playlist, Error> {
-        fetch_playlist_tracks(&client_id, &playlist_id).await
+        fetch_playlist_tracks(client_id, playlist_id).await
+    }
+}
+
+impl Default for ApiClient {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -78,7 +84,7 @@ impl TryFrom<TrackResponse> for Track {
             .unwrap()
             .transcodings
             .into_iter()
-            .find(|ts| ts.format.protocol == String::from("progressive"))
+            .find(|ts| ts.format.protocol == *"progressive")
         {
             Some(transcoding) => Some(transcoding.url),
             _ => return Err(Error::SoundcloudIncompleteTrack(track.title.unwrap())),
