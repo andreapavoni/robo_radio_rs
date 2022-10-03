@@ -1,7 +1,7 @@
 use super::ws::{Client, Clients, WebSocketHandler};
 use crate::{
     error::Error,
-    media_player::{MediaPlayer, Playback},
+    media_player::{CurrentTrack, MediaPlayer},
     web::ws::broadcast_message,
 };
 use anyhow::Result;
@@ -35,8 +35,8 @@ impl Station {
     }
 
     // Utils
-    pub async fn current_track(&mut self) -> Playback {
-        self.media_player.playback.as_ref().unwrap().clone()
+    pub async fn current_track(&mut self) -> CurrentTrack {
+        self.media_player.current_track.as_ref().unwrap().clone()
     }
 
     pub async fn next_track(&mut self) -> Result<(), Error> {

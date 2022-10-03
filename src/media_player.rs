@@ -9,7 +9,7 @@ use rand::thread_rng;
 use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
-pub struct Playback {
+pub struct CurrentTrack {
     pub started_at: DateTime<Utc>,
     pub id: u64,
     pub permalink_url: String,
@@ -22,7 +22,7 @@ pub struct Playback {
     pub token: String,
 }
 
-impl Playback {
+impl CurrentTrack {
     pub fn new(track: &Track) -> Self {
         Self {
             started_at: Utc::now(),
@@ -45,7 +45,7 @@ pub struct MediaPlayer {
     client_id: String,
     api: ApiClient,
     tracks_ids: Vec<u64>,
-    pub playback: Option<Playback>,
+    pub current_track: Option<CurrentTrack>,
 }
 
 impl MediaPlayer {
@@ -53,7 +53,7 @@ impl MediaPlayer {
         Self {
             client_id: client_id.to_string(),
             tracks_ids: vec![],
-            playback: None,
+            current_track: None,
             api: ApiClient::new(),
             playlist_id: None,
         }
@@ -73,17 +73,21 @@ impl MediaPlayer {
     }
 
     pub async fn load_next_track(&mut self) -> Result<(), Error> {
-        if self.tracks_ids.is_empty() {
-            self.load_playlist(self.clone().playlist_id.as_ref().unwrap().as_str())
-                .await?;
-        }
+        loop {
+            if self.tracks_ids.is_empty() {
+                self.load_playlist(self.clone().playlist_id.as_ref().unwrap().as_str())
+                    .await?;
+            }
 
-        let track_id = self.tracks_ids.pop().unwrap();
-        let track = self
-            .api
-            .get_track(self.client_id.as_ref(), track_id)
-            .await?;
-        self.playback = Some(Playback::new(&track));
+            let track_id = self.tracks_ids.pop().unwrap();
+
+            if let Ok(track) = self.api.get_track(self.client_id.as_ref(), track_id).await {
+                self.current_track = Some(CurrentTrack::new(&track));
+                break;
+            }
+            tracing::warn!("skipping track with id {} because of some error", track_id);
+            continue;
+        }
         Ok(())
     }
 }
