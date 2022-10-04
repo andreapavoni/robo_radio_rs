@@ -1,6 +1,7 @@
 use super::{Playlist, Track};
 use crate::error::Error;
 use anyhow::Result;
+use lazy_static::lazy_static;
 use regex::Regex;
 use reqwest::{header::HeaderMap, Response};
 use reqwest_middleware::ClientBuilder;
@@ -82,9 +83,13 @@ pub async fn fetch_new_client_id() -> Result<String, Error> {
 }
 
 async fn find_client_id(page: String) -> Result<String, Error> {
-    let re_src = Regex::new(r#"<script[^>]+src="([^"]+)""#).unwrap();
-    let re_client_id = Regex::new(r#"client_id\s*:\s*"([0-9a-zA-Z]{32})""#).unwrap();
-    for src in re_src.captures_iter(page.as_str()) {
+    lazy_static! {
+        static ref RE_SRC: Regex = Regex::new(r#"<script[^>]+src="([^"]+)""#).unwrap();
+        static ref RE_CLIENT_ID: Regex =
+            Regex::new(r#"client_id\s*:\s*"([0-9a-zA-Z]{32})""#).unwrap();
+    }
+
+    for src in RE_SRC.captures_iter(page.as_str()) {
         let url = &src[1];
 
         let mut headers = HeaderMap::new();
@@ -96,12 +101,15 @@ async fn find_client_id(page: String) -> Result<String, Error> {
             .await
             .map_err(Error::SoundcloudTextResponseError)?;
 
-        if let Some(client_id) = re_client_id.find(js.as_str()) {
-            return Ok(client_id.as_str().to_string());
+        if let Some(cap) = RE_CLIENT_ID.captures(js.as_str()) {
+            let client_id = cap.get(1).map_or("", |m| m.as_str());
+            tracing::info!("fetched new client id {}", client_id);
+            return Ok(client_id.to_string());
         }
     }
 
-    Err(Error::SoundcloudJsonParseError(String::from(
+    tracing::warn!("unable to fetch new client id");
+    Err(Error::SoundcloudClientIdUpdateError(String::from(
         "SoundCloud client_id not found",
     )))
 }
@@ -120,7 +128,9 @@ async fn http_get(url: &str, headers: &HeaderMap) -> Result<Response, Error> {
         .map_err(Error::SoundcloudRequestError)?;
 
     if !res.status().is_success() {
-        return Err(Error::SoundcloudResponseError(res.status().as_u16()));
+        let err = Error::SoundcloudResponseError(res.status().as_u16());
+        tracing::error!("{} requesting `{}`", err, url);
+        return Err(err);
     }
 
     Ok(res)

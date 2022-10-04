@@ -1029,6 +1029,7 @@ dependencies = [
  "axum-extra",
  "chrono",
  "futures",
+ "lazy_static",
  "rand",
  "regex",
  "reqwest",

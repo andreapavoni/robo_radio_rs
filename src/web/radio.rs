@@ -21,8 +21,8 @@ pub struct Station {
 }
 
 impl Station {
-    pub async fn new(client_id: &str, playlist_id: &str) -> Result<Station, Error> {
-        let mut media_player = MediaPlayer::new(client_id);
+    pub async fn new(playlist_id: &str) -> Result<Station, Error> {
+        let mut media_player = MediaPlayer::new().await?;
         let listeners: Clients = HashMap::new();
 
         media_player.load_playlist(playlist_id.as_ref()).await?;

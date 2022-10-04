@@ -16,4 +16,6 @@ pub enum Error {
     SoundcloudIncompleteTrack(String),
     #[error(transparent)]
     WebSocketError(#[from] axum::Error),
+    #[error("can't update soundcloud client id")]
+    SoundcloudClientIdUpdateError(String),
 }

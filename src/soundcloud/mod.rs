@@ -1,5 +1,6 @@
 use self::client::{
-    fetch_playlist_tracks, fetch_track_info, fetch_track_stream, PlaylistResponse, TrackResponse,
+    fetch_new_client_id, fetch_playlist_tracks, fetch_track_info, fetch_track_stream,
+    PlaylistResponse, TrackResponse,
 };
 use crate::error::Error;
 use anyhow::Result;
@@ -14,6 +15,10 @@ pub struct ApiClient {}
 impl ApiClient {
     pub fn new() -> Self {
         ApiClient {}
+    }
+
+    pub async fn get_client_id(&self) -> Result<String, Error> {
+        fetch_new_client_id().await
     }
 
     pub async fn get_track(&self, client_id: &str, track_id: u64) -> Result<Track, Error> {
