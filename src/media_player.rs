@@ -84,7 +84,7 @@ impl MediaPlayer {
 
         tracing::info!(
             "(re)loaded playlist with {} tracks",
-            playlist.tracks_ids.clone().iter().count()
+            playlist.tracks_ids.clone().len()
         );
 
         Ok(())
