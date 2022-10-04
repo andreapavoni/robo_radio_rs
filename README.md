@@ -6,7 +6,7 @@ A Rust implementation of https://radio.pavonz.com (built with Elixir and Phoenix
 
 ## How it works
 
-RoboRadio loads a playlist from https://soundcloud.com, shuffles the tracks and for each track it will play the song and notify the connected users through websockets.When the songs in the playlist have been all played, it reloads and shuffle the tracks again.
+RoboRadio loads a playlist from https://soundcloud.com, shuffles the tracks, for each one it will play the song and notify the connected users through websockets. When the songs in the playlist have been all played, it reloads and shuffle the tracks again.
 
 ## How to run RoboRadio
 
