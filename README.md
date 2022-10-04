@@ -1,10 +1,28 @@
 # RoboRadio
 
-A Rust implementation of https://radio.pavonz.com (built with Elixir and Phoenix).
+## What is this
+A Rust implementation of https://radio.pavonz.com (built with Elixir and Phoenix). It works like a real radio, you turn it on (well, in this case, you open the web page) and you listen what's being played at the exact point. The radio goes on alone.
 
-## Current status: WIP
+## How it works
+RoboRadio loads a playlist from https://soundcloud.com, shuffles the tracks and for each track it will play the song and notify the connected users through websockets.When the songs in the playlist have been all played, it reloads and shuffle the tracks again.
 
-Planned TODO:
+## How to run RoboRadio
+
+### Locally
+
+- clone the repository and run:
+  ```sh
+  $ cd frontend && npm install && cd ..
+  $ cargo make frontend
+  $ cargo run
+  ```
+- use the `Dockerfile.default` to build a container and run it throught Docker (or Podman). The app will listen on port `8080`. There's a `.env.dist` file with usable ENV settings.
+
+### Deploy
+
+Use the `Dockerfile` included in this repository to deploy on https://fly.io. There's a demo instance at https://funky-radio.fly.dev.
+
+## Current status
 
 - [x] add soundcloud API client
   - [x] fetch playlist info
@@ -21,6 +39,5 @@ Planned TODO:
     - [x] broadcast new track when last one's duration has elapsed
 - [x] logging/tracing
 - [x] improved error handling (`anyhow` + `thiserror` ?)
-- [ ] replace Axum with Warp
-- [ ] auto-update soundcloud's `client_id`
+- [x] auto-update soundcloud's `client_id`
 - [ ] testing (mocks for external API calls)
