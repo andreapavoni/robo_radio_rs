@@ -21,7 +21,7 @@ async-trait = "0.1.57"
 # Web & HTTP stuff
 axum ={version = "0.6.0-rc.2", features = ["ws", "headers", "json"]}
 axum-extra = {version = "0.4.0-rc.1", features = ["spa"]}
-tower-http = { version = "0.3.0", features = ["trace"] }
+tower-http = { version = "0.3.0", features = ["trace", "set-header"] }
 
 # Result and Error handling
 anyhow = "1.0"

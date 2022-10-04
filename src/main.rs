@@ -1,4 +1,8 @@
-use axum::{routing::get, Router};
+use axum::{
+    http::{header, HeaderValue},
+    routing::get,
+    Router,
+};
 use axum_extra::routing::SpaRouter;
 use robo_radio::{
     error::Error,
@@ -10,6 +14,7 @@ use robo_radio::{
 use std::{env, net::SocketAddr, sync::Arc};
 use tokio::sync::Mutex;
 use tower_http::{
+    set_header::SetResponseHeaderLayer,
     trace::{DefaultOnResponse, TraceLayer},
     LatencyUnit,
 };
@@ -19,7 +24,7 @@ use tracing_subscriber::{EnvFilter, FmtSubscriber};
 async fn main() -> Result<(), Error> {
     FmtSubscriber::builder()
         .with_env_filter(EnvFilter::new(
-            env::var("RUST_LOG").unwrap_or_else(|_| "robo_radio=info,tower_http=trace".into()),
+            env::var("RUST_LOG").unwrap_or_else(|_| "robo_radio=info,tower_http=info".into()),
         ))
         .with_target(true)
         .with_ansi(true)
@@ -38,6 +43,10 @@ async fn main() -> Result<(), Error> {
         .route("/", get(index_handler))
         .route("/ws", get(websocket_handler))
         .merge(SpaRouter::new("/assets", "assets"))
+        .layer(SetResponseHeaderLayer::if_not_present(
+            header::CACHE_CONTROL,
+            HeaderValue::from_static("max-age=3600"),
+        ))
         .layer(
             TraceLayer::new_for_http().on_response(
                 DefaultOnResponse::new()
