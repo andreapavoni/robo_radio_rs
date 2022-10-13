@@ -1,0 +1,45 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: deploy
+    image: plugins/docker
+    settings:
+      username: $DOCKER_HUB_USERNAME
+      password: $DOCKER_HUB_PASSWORD
+      repo: andreapavoni/robo_radio
+      tags: latest
+      purge: true
+      custom_dns: 1.1.1.1
+    environment:
+      CARGO_NET_GIT_FETCH_WITH_CLI: true
+      DOCKER_IMAGE_NAME:
+        from_secret: DOCKER_IMAGE_NAME
+      DOCKER_HUB_USERNAME:
+        from_secret: DOCKER_HUB_USERNAME
+      DOCKER_HUB_PASSWORD:
+        from_secret: DOCKER_HUB_PASSWORD
+    # commands:
+    #   # build the Docker image (this will use the Dockerfile in the root of the repo)
+    #   - docker build -t $DOCKER_IMAGE_NAME:$DRONE_COMMIT .
+    #   # authenticate with the Docker Hub registry
+    #   - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
+    #   # push the new Docker image to the Docker registry
+    #   - docker push $DOCKER_IMAGE_NAME:$DRONE_TAG
+
+    # DEPLOY
+    # reload running image on server
+    # - ssh deployer@funky.studio -C "sudo service docker-compose reload"
+    # remove old images
+    # - ssh deployer@funky.studio -C "sudo docker system prune -f"
+    when:
+      branch:
+        - master
+      # ref:
+      #   - refs/tags/*
+
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock

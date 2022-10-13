@@ -3,17 +3,11 @@ import WS from "./lib/ws";
 
 let player = new Player();
 let protocol = location.protocol.match(/^https/) ? "wss" : "ws";
-let socket = new WS(
-  `${protocol}://${location.host}/ws`,
-  "",
-  20000,
-  10000,
-  3000,
-  "PING"
-);
+const url = `${protocol}://${location.host}/ws`;
+let socket = new WS(url, "", 20000, 10000, 3000, "PING");
 
 socket.onopen = function () {
-  console.log("connected to ws host");
+  console.log(`connected to ws ${url}`);
 };
 
 socket.onmessage = function (e) {
@@ -27,6 +21,7 @@ socket.onmessage = function (e) {
     if (evt.event == "track") {
       player.load(evt.data);
       setMediaSession(evt.data);
+      navigator.mediaSession.playbackState = "playing";
 
       if (player.status == "playing") {
         player.play();
@@ -65,12 +60,12 @@ function setMediaSession(track) {
       album: "",
       // artwork: [
       //   {
-      //     src: "https://whatpwacando.today/src/img/media/mirror-conspiracy256x256.jpeg",
+      //     src: "https://example.com/assets/cover.jpeg",
       //     sizes: "256x256",
       //     type: "image/jpeg",
       //   },
       //   {
-      //     src: "https://whatpwacando.today/src/img/media/mirror-conspiracy512x512.jpeg",
+      //     src: "https://example.com/assets/cover.jpeg",
       //     sizes: "512x512",
       //     type: "image/jpeg",
       //   },
