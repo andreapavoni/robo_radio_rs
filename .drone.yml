@@ -9,13 +9,13 @@ steps:
     volumes:
       - name: dockersock
         path: /var/run
-    environment:
-      - DOCKER_IMAGE_NAME:
-        from_secret: DOCKER_IMAGE_NAME
-      - DOCKER_HUB_USERNAME:
-        from_secret: DOCKER_HUB_USERNAME
-      - DOCKER_HUB_PASSWORD:
-        from_secret: DOCKER_HUB_PASSWORD
+    # environment:
+    #   - DOCKER_IMAGE_NAME:
+    #     from_secret: DOCKER_IMAGE_NAME
+    #   - DOCKER_HUB_USERNAME:
+    #     from_secret: DOCKER_HUB_USERNAME
+    #   - DOCKER_HUB_PASSWORD:
+    #     from_secret: DOCKER_HUB_PASSWORD
     commands:
       - sleep 5 # give docker enough time to start
       # build the Docker image (this will use the Dockerfile in the root of the repo)
