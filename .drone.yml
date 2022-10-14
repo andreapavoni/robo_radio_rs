@@ -8,12 +8,12 @@ steps:
     detach: true
     environment:
       - DOCKER_HOST=tcp://docker:2375
-      - DOCKER_IMAGE_NAME:
-        from_secret: DOCKER_IMAGE_NAME
-      - DOCKER_HUB_USERNAME:
-        from_secret: DOCKER_HUB_USERNAME
-      - DOCKER_HUB_PASSWORD: 
-        from_secret: DOCKER_HUB_PASSWORD
+      # - DOCKER_IMAGE_NAME:
+      #   from_secret: DOCKER_IMAGE_NAME
+      # - DOCKER_HUB_USERNAME:
+      #   from_secret: DOCKER_HUB_USERNAME
+      # - DOCKER_HUB_PASSWORD: 
+      #   from_secret: DOCKER_HUB_PASSWORD
     commands:
       # build the Docker image (this will use the Dockerfile in the root of the repo)
       - docker build -t $DOCKER_IMAGE_NAME:$DRONE_COMMIT .
