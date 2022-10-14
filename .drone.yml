@@ -9,7 +9,6 @@ steps:
       - name: dockersock
         path: /var/run
     environment:
-      DOCKER_IMAGE_NAME=robo_radio
       DOCKER_HUB_USERNAME:
         from_secret: DOCKER_HUB_USERNAME
       DOCKER_HUB_PASSWORD:
@@ -17,11 +16,11 @@ steps:
     commands:
       - sleep 5 # give docker enough time to start
       # build the Docker image (this will use the Dockerfile in the root of the repo)
-      - docker build -t $DOCKER_IMAGE_NAME:$DRONE_COMMIT .
+      - docker build -t andreapavoni/robo_radio:latest .
       # authenticate with the Docker Hub registry
       - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
       # push the new Docker image to the Docker registry
-      - docker push $DOCKER_IMAGE_NAME:$DRONE_TAG
+      - docker push andreapavoni/robo_radio:latest
 
     # DEPLOY
     # reload running image on server
