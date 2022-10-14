@@ -60,14 +60,16 @@ async fn main() -> Result<(), Error> {
     });
 
     // Use "[::]" to listen on both IPv4 (0.0.0.0) and IPv6
-    let srv_host = env::var("ROBO_RADIO_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+    let srv_host = env::var("ROBO_RADIO_HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
     let srv_port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+
+    tracing::info!("address listening `{}`:`{}`", srv_host, srv_port);
 
     let addr = format!("{}:{}", srv_host, srv_port)
         .parse::<SocketAddr>()
-        .unwrap();
-    tracing::info!("server started and listening on {}", addr);
+        .expect(format!("unable to parse socket address with `{}:{}`", srv_host, srv_port).as_str());
 
+    tracing::info!("server started and listening on {}", addr);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await

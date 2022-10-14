@@ -10,8 +10,6 @@ RUN npm run build && npm run deploy
 ###################### BACKEND BUILD ###########################################
 FROM rust:1.63-bullseye AS backend_build
 
-ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
-
 WORKDIR /app
 COPY . /app
 RUN cargo build --release
@@ -25,7 +23,13 @@ RUN apt-get update -y \
   && apt-get clean -y \
   && rm -rf /var/lib/apt/lists/*WORKDIR
 
-COPY --from=backend_build /app/target/release/robo_radio /
-COPY --from=frontend_build /app/assets /assets
+# Run as "app" user
+RUN useradd -ms /bin/bash app
 
-CMD ./robo_radio
+USER app
+WORKDIR /app
+
+COPY --from=backend_build /app/target/release/robo_radio /app/robo_radio
+COPY --from=frontend_build /app/assets /app/assets
+
+CMD ["./robo_radio"]
