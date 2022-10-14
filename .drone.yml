@@ -9,8 +9,7 @@ steps:
       - name: dockersock
         path: /var/run
     environment:
-      DOCKER_IMAGE_NAME:
-        from_secret: DOCKER_IMAGE_NAME
+      DOCKER_IMAGE_NAME=robo_radio
       DOCKER_HUB_USERNAME:
         from_secret: DOCKER_HUB_USERNAME
       DOCKER_HUB_PASSWORD:
