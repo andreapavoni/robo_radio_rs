@@ -18,14 +18,14 @@ use tower_http::{
     trace::{DefaultOnResponse, TraceLayer},
     LatencyUnit,
 };
-use tracing_subscriber::{EnvFilter, FmtSubscriber};
+use tracing_subscriber::{EnvFilter, FmtSubscriber, filter::LevelFilter};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     FmtSubscriber::builder()
-        .with_env_filter(EnvFilter::new(
-            env::var("RUST_LOG").unwrap_or_else(|_| "robo_radio=info,tower_http=info".into()),
-        ))
+        .with_env_filter(
+            EnvFilter::from_default_env().add_directive(LevelFilter::INFO.into())
+        )
         .with_target(true)
         .with_ansi(true)
         .compact()
