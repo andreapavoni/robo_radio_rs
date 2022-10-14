@@ -6,20 +6,18 @@ steps:
   - name: deploy
     image: plugins/docker
     settings:
-      username: $DOCKER_HUB_USERNAME
-      password: $DOCKER_HUB_PASSWORD
+      username:
+        from_secret: DOCKER_HUB_USERNAME
+      password: 
+        from_secret: DOCKER_HUB_PASSWORD
       repo: andreapavoni/robo_radio
       tags: latest
       purge: true
       custom_dns: 1.1.1.1
     environment:
-      CARGO_NET_GIT_FETCH_WITH_CLI: true
-      DOCKER_IMAGE_NAME:
-        from_secret: DOCKER_IMAGE_NAME
-      DOCKER_HUB_USERNAME:
-        from_secret: DOCKER_HUB_USERNAME
-      DOCKER_HUB_PASSWORD:
-        from_secret: DOCKER_HUB_PASSWORD
+      # CARGO_NET_GIT_FETCH_WITH_CLI: true
+      # DOCKER_IMAGE_NAME:
+      #   from_secret: DOCKER_IMAGE_NAME
     # commands:
     #   # build the Docker image (this will use the Dockerfile in the root of the repo)
     #   - docker build -t $DOCKER_IMAGE_NAME:$DRONE_COMMIT .
