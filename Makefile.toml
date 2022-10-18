@@ -1,10 +1,10 @@
 [tasks.frontend_clean]
-script = "rm $CARGO_MAKE_WORKING_DIRECTORY/assets/*"
+script = "rm -rf $CARGO_MAKE_WORKING_DIRECTORY/assets/*"
 
 [tasks.frontend]
 script = '''
 cd ./frontend # cargo-make will revert to original directory after script execution
-npm run build && npm run deploy
+npm run deploy
 '''
 dependencies = ["frontend_clean"]
 

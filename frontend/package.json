@@ -14,8 +14,7 @@
   },
   "dependencies": {},
   "scripts": {
-    "deploy": "NODE_ENV=production tailwindcss --postcss --minify --input=css/app.css --output=../assets/app.css",
-    "build": "node build.js --deploy",
+    "deploy": "node build.js --deploy && NODE_ENV=production tailwindcss --postcss --minify --input=css/app.css --output=../assets/app.css && cp -R images ../assets/",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }
