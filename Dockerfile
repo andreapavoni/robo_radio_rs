@@ -4,8 +4,7 @@ FROM node:16-alpine AS frontend_build
 COPY ./frontend /app/frontend
 
 WORKDIR /app/frontend
-RUN npm install
-RUN npm run build && npm run deploy
+RUN npm install && npm run deploy
 
 ###################### BACKEND BUILD ###########################################
 FROM rust:1.63-bullseye AS backend_build
