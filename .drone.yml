@@ -21,12 +21,6 @@ steps:
       - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
       # push the new Docker image to the Docker registry
       - docker push andreapavoni/robo_radio:latest
-
-    # DEPLOY
-    # reload running image on server
-    # - ssh deployer@funky.studio -C "sudo service docker-compose reload"
-    # remove old images
-    # - ssh deployer@funky.studio -C "sudo docker system prune -f"
     when:
       branch:
         - master
