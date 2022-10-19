@@ -2,7 +2,7 @@
 
 ## What is this
 
-A Rust implementation of https://radio.pavonz.com (built with Elixir and Phoenix). It works like a real radio, you turn it on (well, in this case, you open the web page) and you listen what's being played at the exact point. The radio goes on alone.
+A Rust implementation of https://radio.pavonz.com (originally built with Elixir and Phoenix, still not open sourced yet). It works like a real radio: you turn it on (well, in this case, you open the web page) and you'll listen what's being played at the exact point. The radio goes on automagically.
 
 ## How it works
 
@@ -22,7 +22,7 @@ RoboRadio loads a playlist from https://soundcloud.com, shuffles the tracks, for
 
 ### Deploy
 
-Use the `Dockerfile` included in this repository to deploy on https://fly.io. There's a demo instance at https://funky-radio.fly.dev.
+Use the `Dockerfile` included in this repository for a basic deploy, or adjust if needed. After some weeks of testing, I decided to deploy as the official RoboRadio in place of the Elixir one.
 
 ## Current status
 
